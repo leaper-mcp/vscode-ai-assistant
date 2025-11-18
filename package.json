@@ -1,0 +1,167 @@
+{
+  "name": "ai-chat-assistant",
+  "displayName": "AI Chat Assistant",
+  "description": "AI对话助手，支持多种模型配置和MCP接入",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning"
+  ],
+  "activationEvents": [
+    "onCommand:aiChat.openChat",
+    "onCommand:aiChat.configureSettings"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aiChat.openChat",
+        "title": "打开AI对话",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "aiChat.configureSettings",
+        "title": "配置AI设置"
+      },
+      {
+        "command": "aiChat.clearHistory",
+        "title": "清空对话历史"
+      },
+      {
+        "command": "aiChat.mcp.listServers",
+        "title": "列出MCP服务器"
+      },
+      {
+        "command": "aiChat.mcp.reconnectServer",
+        "title": "重连MCP服务器"
+      },
+      {
+        "command": "aiChat.mcp.showOutput",
+        "title": "显示MCP输出"
+      },
+      {
+        "command": "aiChat.showConfigInfo",
+        "title": "显示当前配置信息"
+      }
+    ],
+    "views": {
+      "aiChat": [
+        {
+          "id": "aiChatView",
+          "name": "AI对话",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aiChat",
+          "title": "AI对话助手",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI Chat Assistant",
+      "properties": {
+        "aiChat.apiBaseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "AI模型API基础地址"
+        },
+        "aiChat.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API密钥",
+          "scope": "application"
+        },
+        "aiChat.modelName": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "description": "模型名称"
+        },
+        "aiChat.customHeaders": {
+          "type": "object",
+          "default": {},
+          "description": "自定义HTTP请求头（JSON格式），例如{\"User-Agent\": \"MyApp\", \"X-Custom\": \"value\"}",
+          "scope": "application"
+        },
+        "aiChat.customBodyFields": {
+          "type": "object",
+          "default": {},
+          "description": "自定义请求体字段（JSON格式），会与默认字段合并发送",
+          "scope": "application"
+        },
+        "aiChat.overrideDefaultBody": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否完全覆盖默认请求体。开启后，将只发送自定义body字段"
+        },
+        "aiChat.mcpServers": {
+          "type": "array",
+          "default": [],
+          "description": "MCP服务器配置列表",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "服务器名称"
+              },
+              "command": {
+                "type": "string",
+                "description": "启动命令"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "命令参数"
+              }
+            }
+          }
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "aiChat.openChat",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a"
+      }
+    ],
+    "menus": {
+        "view/title": [
+            {
+                "command": "aiChat.configureSettings",
+                "when": "view == aiChatView",
+                "group": "navigation"
+            },
+            {
+                "command": "aiChat.clearHistory",
+                "when": "view == aiChatView",
+                "group": "navigation"
+            }
+        ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "axios": "^1.6.0"
+  }
+}
