@@ -1,15 +1,25 @@
 import * as vscode from 'vscode';
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { WebSocketClientTransport } from "@modelcontextprotocol/sdk/client/websocket.js";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+
 
 export interface McpServerConfig {
     name: string;
-    command: string;
-    args: string[];
+    type: 'sse' | 'websocket' | 'stdio';
+    stdio?:{
+        command: string;
+        args: string[];
+    }
+    sse?: string,
+    websocket?: string,
 }
 
 export class McpManager implements vscode.Disposable {
     private context: vscode.ExtensionContext;
     private outputChannel: vscode.OutputChannel;
-    private connectedServers: string[] = [];
+    private connectedServers: Map<string,Client> = new Map();
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -21,7 +31,7 @@ export class McpManager implements vscode.Disposable {
         const servers = config.get<McpServerConfig[]>('mcpServers', []);
 
         this.outputChannel.appendLine('正在初始化MCP服务器...');
-        this.connectedServers = [];
+        this.connectedServers = new Map();
 
         for (const serverConfig of servers) {
             try {
@@ -35,65 +45,52 @@ export class McpManager implements vscode.Disposable {
 
     private async connectToServer(config: McpServerConfig): Promise<void> {
         this.outputChannel.appendLine(`尝试连接MCP服务器: ${config.name}`);
-        this.outputChannel.appendLine(`命令: ${config.command} ${config.args.join(' ')}`);
+        const mcpCli = new Client({
+            name: "mcp-proxy-cli", 
+            version: "1.0.0" 
+        },{capabilities: {tools: true}});
+        if(config.type === 'stdio' && config.stdio) {
+            const transport = new StdioClientTransport(config.stdio);
+            await mcpCli.connect(transport);
+        }
+        if(config.type === 'sse' && config.sse) {
+            const transport = new SSEClientTransport(new URL(config.sse));
+            await mcpCli.connect(transport);
+        }
+        if(config.type === 'websocket' && config.websocket) {
+            const transport = new WebSocketClientTransport(new URL(config.websocket));
+            await mcpCli.connect(transport);
+        }
 
-        // 简化版本 - 只是记录连接信息
-        // 实际的MCP集成需要根据具体的SDK版本来实现
-        this.connectedServers.push(config.name);
+        this.connectedServers.set(config.name,mcpCli);
         this.outputChannel.appendLine(`MCP服务器 ${config.name} 已记录（简化模式）`);
-
-        // 在这里可以添加实际的MCP连接逻辑
-        // 需要参考最新的MCP SDK文档
     }
 
     public async callTool(serverName: string, toolName: string, args: any): Promise<any> {
-        if (!this.connectedServers.includes(serverName)) {
+        if (!this.getConnectedServers().includes(serverName)) {
             throw new Error(`MCP服务器 ${serverName} 未连接`);
         }
-
-        // 简化版本 - 返回模拟响应
         this.outputChannel.appendLine(`模拟调用MCP工具 ${serverName}.${toolName}，参数: ${JSON.stringify(args)}`);
-        
-        return {
-            content: [
-                {
-                    type: "text",
-                    text: `模拟响应：工具 ${toolName} 被调用，参数: ${JSON.stringify(args)}`
-                }
-            ]
-        };
+        return await this.connectedServers.get(serverName)?.callTool({
+                name:toolName,
+                arguments:args
+        });
     }
 
     public async listTools(serverName: string): Promise<any> {
-        if (!this.connectedServers.includes(serverName)) {
+        if (!this.getConnectedServers().includes(serverName)) {
             throw new Error(`MCP服务器 ${serverName} 未连接`);
         }
-
-        // 简化版本 - 返回模拟工具列表
-        this.outputChannel.appendLine(`列出MCP服务器 ${serverName} 的工具（模拟）`);
-        
-        return {
-            tools: [
-                {
-                    name: "example_tool",
-                    description: "示例工具",
-                    inputSchema: {
-                        type: "object",
-                        properties: {
-                            message: { type: "string" }
-                        }
-                    }
-                }
-            ]
-        };
+        this.outputChannel.appendLine(`列出MCP服务器 ${serverName} 的工具`);
+        return await this.connectedServers.get(serverName)?.listTools();
     }
 
     public getConnectedServers(): string[] {
-        return [...this.connectedServers];
+        return Array.from(this.connectedServers.keys());
     }
 
     public isServerConnected(serverName: string): boolean {
-        return this.connectedServers.includes(serverName);
+        return this.getConnectedServers().includes(serverName);
     }
 
     public async reconnectServer(serverName: string): Promise<void> {
@@ -106,24 +103,27 @@ export class McpManager implements vscode.Disposable {
         }
 
         // 先断开现有连接
-        this.disconnectServer(serverName);
+        await this.disconnectServer(serverName);
 
         // 重新连接
         await this.connectToServer(serverConfig);
     }
 
-    private disconnectServer(serverName: string): void {
-        const index = this.connectedServers.indexOf(serverName);
-        if (index > -1) {
-            this.connectedServers.splice(index, 1);
+    private async disconnectServer(serverName: string): Promise<void> {
+        if (this.connectedServers.has(serverName)) {
+            await this.connectedServers.get(serverName)?.close();
+            this.connectedServers.delete(serverName);
             this.outputChannel.appendLine(`MCP服务器 ${serverName} 已断开`);
+        }
+    }
+    private async disconnectAllServer(): Promise<void> {
+        for(const serverName of this.connectedServers.keys()) {
+            await this.disconnectServer(serverName);
         }
     }
 
     public async refreshConnections(): Promise<void> {
-        // 断开所有现有连接
-        this.connectedServers = [];
-
+        await this.disconnectAllServer();
         // 重新初始化
         await this.initialize();
     }
@@ -133,8 +133,7 @@ export class McpManager implements vscode.Disposable {
     }
 
     public dispose(): void {
-        // 清理所有连接
-        this.connectedServers = [];
+        this.disconnectAllServer();
         this.outputChannel.dispose();
     }
 }
