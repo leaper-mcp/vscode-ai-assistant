@@ -517,6 +517,18 @@ export class AiService {
                 return await toolHandlers.readFile(args);
             case 'writeFile':
                 return await toolHandlers.writeFile(args);
+            case 'getCurrentFilePath':
+                return await toolHandlers.getCurrentFilePath();
+            case 'getAllOpenFiles':
+                return await toolHandlers.getAllOpenFiles();
+            case 'getCurrentSelection':
+                return await toolHandlers.getCurrentSelection();
+            case 'getCurrentLineContent':
+                return await toolHandlers.getCurrentLineContent();
+            case 'getCursorInfo':
+                return await toolHandlers.getCursorInfo();
+            case 'openFileToEdit':
+                return await toolHandlers.openFileToEdit(args);
             default:
                 throw new Error(`未知的工具函数: ${functionName}`);
         }
