@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "npm-compile",
+            "label": "npm-build",
             "type": "npm",
-            "script": "compile",
+            "script": "build",
             "group": "build",
             "presentation": {
                 "panel": "dedicated",
