@@ -19,7 +19,7 @@
 1. 克隆此仓库到本地
 2. 在VSCode中打开项目
 3. 运行 `npm install` 安装依赖
-4. 运行 `npm run compile` 编译TypeScript代码
+4. 运行 `npm run build` 编译TypeScript代码和vscode页面代码
 5. 按F5启动调试模式
 
 ## 配置
