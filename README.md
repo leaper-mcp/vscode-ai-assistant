@@ -31,6 +31,7 @@
 - `aiChat.apiBaseUrl`: AI模型API基础地址（默认: `https://api.openai.com/v1`）
 - `aiChat.apiKey`: API密钥（需要手动配置）
 - `aiChat.modelName`: 模型名称（默认: `gpt-3.5-turbo`）
+- `aiChat.systemRole`: **AI助手角色设定**（可选），会作为系统消息添加到对话开头，例如：你现在是一个开发专家
 
 ### 🔧 高级配置
 
@@ -44,28 +45,34 @@
 
 ### MCP配置
 
-`aiChat.mcpServers`: MCP服务器配置列表，每个服务器包含：
-- `name`: 服务器名称
-- `command`: 启动命令
-- `args`: 命令参数数组
+`aiChat.mcpServers`: MCP服务器配置列表（JSON数组格式），现在使用多行文本框输入。
 
-示例配置：
+示例配置（直接在设置界面中输入）：
 ```json
-{
-  "aiChat.mcpServers": [
-    {
-      "name": "filesystem",
+[
+  {
+    "name": "filesystem",
+    "type": "stdio",
+    "stdio": {
       "command": "npx",
       "args": ["@modelcontextprotocol/server-filesystem", "/path/to/directory"]
-    },
-    {
-      "name": "git",
+    }
+  },
+  {
+    "name": "git",
+    "type": "stdio",
+    "stdio": {
       "command": "npx",
       "args": ["@modelcontextprotocol/server-git", "--repository", "/path/to/repo"]
     }
-  ]
-}
+  }
+]
 ```
+
+**注意**：
+- 现在使用多行文本框输入，不需要外层的引号
+- 每个服务器需要指定 `type`（stdio、sse 或 websocket）
+- 对于 stdio 类型的服务器，使用 `stdio` 对象包含命令和参数
 
 ## 使用方法
 
@@ -89,6 +96,16 @@
 ### 其他功能
 - 配置设置：在命令面板中搜索 "配置AI设置"
 - 清空历史：在命令面板中搜索 "清空对话历史"
+
+### 角色配置
+在 VSCode 设置中配置 `aiChat.systemRole` 来设定 AI 助手的角色：
+- **开发专家**：提供专业的编程建议和代码分析
+- **产品经理**：从产品角度提供需求分析建议
+- **数据分析师**：进行数据解读和洞察分析
+- **教师**：用简单易懂的方式解释概念
+- **创意写作助手**：提供创意和写作建议
+
+设置后，AI助手会以指定角色的身份回应所有对话。
 
 ## 开发
 

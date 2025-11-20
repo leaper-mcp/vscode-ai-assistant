@@ -81,14 +81,14 @@
           "description": "模型名称"
         },
         "aiChat.customHeaders": {
-          "type": "object",
-          "default": {},
+          "type": "string",
+          "default": "{}",
           "description": "自定义HTTP请求头（JSON格式），例如{\"User-Agent\": \"MyApp\", \"X-Custom\": \"value\"}",
           "scope": "application"
         },
         "aiChat.customBodyFields": {
-          "type": "object",
-          "default": {},
+          "type": "string",
+          "default": "{}",
           "description": "自定义请求体字段（JSON格式），会与默认字段合并发送",
           "scope": "application"
         },
@@ -107,30 +107,17 @@
           "default": false,
           "description": "启用工具调用功能，允许AI使用文件操作等工具"
         },
+        "aiChat.systemRole": {
+          "type": "string",
+          "default": "",
+          "description": "AI助手角色设定，会作为系统消息添加到对话开头，例如：你现在是一个开发专家",
+          "scope": "application"
+        },
         "aiChat.mcpServers": {
-          "type": "array",
-          "default": [],
-          "description": "MCP服务器配置列表",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "服务器名称"
-              },
-              "command": {
-                "type": "string",
-                "description": "启动命令"
-              },
-              "args": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "命令参数"
-              }
-            }
-          }
+          "type": "string",
+          "default": "[]",
+          "description": "MCP服务器配置列表（JSON数组格式），例如[{\"name\":\"filesystem\",\"type\":\"stdio\",\"stdio\":{\"command\":\"npx\",\"args\":[\"@modelcontextprotocol/server-filesystem\",\"/path/to/directory\"]}}]",
+          "scope": "application"
         }
       }
     },

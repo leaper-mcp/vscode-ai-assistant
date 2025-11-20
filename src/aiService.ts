@@ -28,6 +28,7 @@ export interface AiConfig {
     overrideDefaultBody: boolean;
     enableStream: boolean;
     enableTools: boolean;
+    systemRole: string;
 }
 
 export class AiService {
@@ -46,17 +47,43 @@ export class AiService {
 
     private loadConfig(): AiConfig {
         const config = vscode.workspace.getConfiguration('aiChat');
+        
+        // 解析自定义请求头
+        let customHeaders: Record<string, string> = {};
+        const customHeadersStr = config.get('customHeaders', '') as string;
+        if (customHeadersStr && customHeadersStr.trim()) {
+            try {
+                customHeaders = JSON.parse(customHeadersStr);
+            } catch (e: any) {
+                console.error('解析 customHeaders JSON 失败:', e);
+                vscode.window.showErrorMessage(`customHeaders JSON 格式错误: ${e.message}`);
+            }
+        }
+        
+        // 解析自定义请求体字段
+        let customBodyFields: Record<string, any> = {};
+        const customBodyFieldsStr = config.get('customBodyFields', '') as string;
+        if (customBodyFieldsStr && customBodyFieldsStr.trim()) {
+            try {
+                customBodyFields = JSON.parse(customBodyFieldsStr);
+            } catch (e: any) {
+                console.error('解析 customBodyFields JSON 失败:', e);
+                vscode.window.showErrorMessage(`customBodyFields JSON 格式错误: ${e.message}`);
+            }
+        }
+        
         return {
             apiBaseUrl: config.get('apiBaseUrl', 'https://api.openai.com/v1'),
             apiKey: config.get('apiKey', ''),
             modelName: config.get('modelName', 'gpt-3.5-turbo'),
             temperature: config.get('temperature', 0.7),
             maxTokens: config.get('maxTokens', 2000),
-            customHeaders: config.get('customHeaders', {}) || {},
-            customBodyFields: config.get('customBodyFields', {}) || {},
+            customHeaders: customHeaders,
+            customBodyFields: customBodyFields,
             overrideDefaultBody: config.get('overrideDefaultBody', false),
             enableStream: config.get('enableStream', true),
-            enableTools: config.get('enableTools', true)
+            enableTools: config.get('enableTools', true),
+            systemRole: config.get('systemRole', '')
         };
     }
 
@@ -67,6 +94,26 @@ export class AiService {
 
         try {
             let conversationMessages = [...messages];
+            
+            // 如果设置了系统角色，添加到消息开头
+            if (this.config.systemRole && this.config.systemRole.trim()) {
+                const systemMessage: ChatMessage = {
+                    role: 'system',
+                    content: this.config.systemRole.trim(),
+                    timestamp: Date.now()
+                };
+                
+                // 检查是否已经存在系统消息
+                const existingSystemIndex = conversationMessages.findIndex(msg => msg.role === 'system');
+                if (existingSystemIndex >= 0) {
+                    // 替换现有系统消息
+                    conversationMessages[existingSystemIndex] = systemMessage;
+                } else {
+                    // 在开头添加系统消息
+                    conversationMessages.unshift(systemMessage);
+                }
+            }
+            
             let maxIterations = 10; // 防止无限循环
             let currentIteration = 0;
 
@@ -217,6 +264,26 @@ export class AiService {
 
         try {
             let conversationMessages = [...messages];
+            
+            // 如果设置了系统角色，添加到消息开头
+            if (this.config.systemRole && this.config.systemRole.trim()) {
+                const systemMessage: ChatMessage = {
+                    role: 'system',
+                    content: this.config.systemRole.trim(),
+                    timestamp: Date.now()
+                };
+                
+                // 检查是否已经存在系统消息
+                const existingSystemIndex = conversationMessages.findIndex(msg => msg.role === 'system');
+                if (existingSystemIndex >= 0) {
+                    // 替换现有系统消息
+                    conversationMessages[existingSystemIndex] = systemMessage;
+                } else {
+                    // 在开头添加系统消息
+                    conversationMessages.unshift(systemMessage);
+                }
+            }
+            
             let maxIterations = 10; // 防止无限循环
             let currentIteration = 0;
 

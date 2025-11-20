@@ -28,7 +28,18 @@ export class McpManager implements vscode.Disposable {
 
     public async initialize(): Promise<void> {
         const config = vscode.workspace.getConfiguration('aiChat');
-        const servers = config.get<McpServerConfig[]>('mcpServers', []);
+        
+        // 解析 MCP 服务器配置
+        let servers: McpServerConfig[] = [];
+        const serversStr = config.get('mcpServers', '[]') as string;
+        if (serversStr && serversStr.trim()) {
+            try {
+                servers = JSON.parse(serversStr);
+            } catch (e: any) {
+                this.outputChannel.appendLine(`解析 mcpServers JSON 失败: ${e.message}`);
+                vscode.window.showErrorMessage(`mcpServers JSON 格式错误: ${e.message}`);
+            }
+        }
 
         this.outputChannel.appendLine('正在初始化MCP服务器...');
         this.connectedServers = new Map();
@@ -95,7 +106,20 @@ export class McpManager implements vscode.Disposable {
 
     public async reconnectServer(serverName: string): Promise<void> {
         const config = vscode.workspace.getConfiguration('aiChat');
-        const servers = config.get<McpServerConfig[]>('mcpServers', []);
+        
+        // 解析 MCP 服务器配置
+        let servers: McpServerConfig[] = [];
+        const serversStr = config.get('mcpServers', '[]') as string;
+        if (serversStr && serversStr.trim()) {
+            try {
+                servers = JSON.parse(serversStr);
+            } catch (e: any) {
+                this.outputChannel.appendLine(`解析 mcpServers JSON 失败: ${e.message}`);
+                vscode.window.showErrorMessage(`mcpServers JSON 格式错误: ${e.message}`);
+                return;
+            }
+        }
+        
         const serverConfig = servers.find(s => s.name === serverName);
 
         if (!serverConfig) {

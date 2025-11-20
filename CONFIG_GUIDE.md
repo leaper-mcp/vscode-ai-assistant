@@ -2,6 +2,28 @@
 
 本指南详细说明如何使用自定义header和body配置来支持各种AI服务提供商。
 
+## ⚠️ 重要更新
+
+**配置界面改进**：`customHeaders`、`customBodyFields` 和 `mcpServers` 现在使用 **多行文本框** 输入，而不是对象/数组编辑器。这样可以更方便地编辑复杂的 JSON 配置。
+
+### 📝 新的使用方式：
+
+1. **直接输入 JSON**：在文本框中直接输入 JSON 内容，不需要引号包围
+2. **更好的可读性**：支持多行格式，便于编辑和查看
+3. **错误提示**：如果 JSON 格式错误，会显示具体的错误信息
+
+### ✨ 示例：
+现在可以这样输入：
+```json
+{
+  "Authorization": "Bearer your-api-key",
+  "User-Agent": "MyApp/1.0",
+  "X-Custom-Header": "custom-value"
+}
+```
+
+---
+
 ## 📋 配置选项说明
 
 ### 1. 自定义请求头 (customHeaders)
@@ -9,15 +31,17 @@
 允许添加自定义HTTP请求头，用于兼容不同的API格式。
 
 #### 配置格式：
+在 VSCode 设置中的 `aiChat.customHeaders` 字段输入以下 JSON 字符串：
+
 ```json
 {
-  "aiChat.customHeaders": {
-    "Authorization": "Bearer your-api-key",
-    "User-Agent": "MyApp/1.0",
-    "X-Custom-Header": "custom-value"
-  }
+  "Authorization": "Bearer your-api-key",
+  "User-Agent": "MyApp/1.0",
+  "X-Custom-Header": "custom-value"
 }
 ```
+
+**注意**：现在使用多行文本框输入，不需要外层的引号，直接输入 JSON 内容即可。
 
 #### 常用场景：
 - **Claude API**: 需要特殊的Authorization格式
@@ -26,21 +50,65 @@
 
 ---
 
-### 2. 自定义请求体字段 (customBodyFields)
+### 2. AI助手角色设定 (systemRole)
+
+为AI助手设置特定的角色或个性，会作为系统消息添加到每次对话的开头。
+
+#### 配置方式：
+在 VSCode 设置中的 `aiChat.systemRole` 字段直接输入文本内容。
+
+#### 常用角色示例：
+
+**开发专家**：
+```
+你现在是一个资深的软件开发专家，具有丰富的前端和后端开发经验。你擅长分析代码、解决问题，并提供最佳实践建议。
+```
+
+**产品经理**：
+```
+你现在是一个经验丰富的产品经理，擅长需求分析、用户研究和产品设计。你能够从用户角度思考问题，并提供清晰的产品建议。
+```
+
+**数据分析师**：
+```
+你现在是一个专业的数据分析师，精通数据处理、统计分析和可视化。你能够洞察数据背后的趋势，并提供有价值的商业洞察。
+```
+
+**创意写作助手**：
+```
+你现在是一个富有创意的写作助手，擅长各种文体的创作。你能够提供优美的文笔、丰富的想象力和独特的表达方式。
+```
+
+**教师**：
+```
+你现在是一个耐心细致的教师，擅长用简单易懂的方式解释复杂的概念。你能够循序渐进地引导学生，并提供实用的学习建议。
+```
+
+#### 使用效果：
+- 设置后，AI助手会以指定角色的身份回应所有对话
+- 影响回答的语气、专业性和风格
+- 可以显著提升特定领域的对话质量
+- 适用于专业场景或特定任务需求
+
+---
+
+### 3. 自定义请求体字段 (customBodyFields)
 
 允许添加或覆盖请求体中的字段。
 
 #### 配置格式：
+在 VSCode 设置中的 `aiChat.customBodyFields` 字段输入以下 JSON 字符串：
+
 ```json
 {
-  "aiChat.customBodyFields": {
-    "stream": false,
-    "top_p": 0.9,
-    "frequency_penalty": 0.1,
-    "presence_penalty": 0.1
-  }
+  "stream": false,
+  "top_p": 0.9,
+  "frequency_penalty": 0.1,
+  "presence_penalty": 0.1
 }
 ```
+
+**注意**：现在使用多行文本框输入，不需要外层的引号，直接输入 JSON 内容即可。
 
 #### 常用场景：
 - **Claude API**: 需要不同的字段名称
@@ -49,19 +117,20 @@
 
 ---
 
-### 3. 覆盖默认请求体 (overrideDefaultBody)
+### 4. 覆盖默认请求体 (overrideDefaultBody)
 
 完全覆盖默认请求体结构，用于API格式完全不同的服务。
 
 #### 配置格式：
+在 VSCode 设置中配置：
+
+1. 设置 `aiChat.overrideDefaultBody` 为 `true`
+2. 在 `aiChat.customBodyFields` 字段中输入：
 ```json
 {
-  "aiChat.overrideDefaultBody": true,
-  "aiChat.customBodyFields": {
-    "prompt": "{{message}}",
-    "max_tokens": 2000,
-    "temperature": 0.7
-  }
+  "prompt": "{{message}}",
+  "max_tokens": 2000,
+  "temperature": 0.7
 }
 ```
 
@@ -72,54 +141,135 @@
 ## 🔧 实际配置示例
 
 ### 示例 1: OpenAI 兼容API
-```json
-{
-  "aiChat.apiBaseUrl": "https://api.openai.com/v1",
-  "aiChat.apiKey": "sk-xxxxxxxx",
-  "aiChat.modelName": "gpt-3.5-turbo",
-  "aiChat.customHeaders": {
-    "Authorization": "Bearer sk-xxxxxxxx"
-  },
-  "aiChat.customBodyFields": {
-    "stream": false,
-    "top_p": 0.9
-  },
-  "aiChat.overrideDefaultBody": false
-}
-```
 
-### 示例 2: Claude API
+在 VSCode 设置中配置：
+
+- `aiChat.apiBaseUrl`: `https://api.openai.com/v1`
+- `aiChat.apiKey`: `sk-xxxxxxxx`
+- `aiChat.modelName`: `gpt-3.5-turbo`
+- `aiChat.customHeaders`:
 ```json
 {
-  "aiChat.apiBaseUrl": "https://api.anthropic.com/v1",
-  "aiChat.modelName": "claude-3-sonnet-20240229",
-  "aiChat.customHeaders": {
-    "x-api-key": "your-claude-api-key",
-    "anthropic-version": "2023-06-01",
-    "Content-Type": "application/json"
-  },
-  "aiChat.customBodyFields": {
-    "max_tokens": 2000,
-    "stream": false
-  },
-  "aiChat.overrideDefaultBody": true
+  "Authorization": "Bearer sk-xxxxxxxx"
 }
 ```
+- `aiChat.customBodyFields`:
+```json
+{
+  "stream": false,
+  "top_p": 0.9
+}
+```
+- `aiChat.overrideDefaultBody`: `false`
+
+- `aiChat.customHeaders`:
+```json
+{
+  "x-api-key": "your-claude-api-key",
+  "anthropic-version": "2023-06-01",
+  "Content-Type": "application/json"
+}
+```
+- `aiChat.customBodyFields`:
+```json
+{
+  "max_tokens": 2000,
+  "stream": false
+}
+```
+- `aiChat.overrideDefaultBody`: `true`
 
 ### 示例 3: 国内API提供商
+
+在 VSCode 设置中配置：
+
+- `aiChat.apiBaseUrl`: `https://api.deepseek.com/v1`
+- `aiChat.apiKey`: `sk-xxxxxxxx`
+- `aiChat.modelName`: `deepseek-chat`
+- `aiChat.customHeaders`:
 ```json
 {
-  "aiChat.apiBaseUrl": "https://api.deepseek.com/v1",
-  "aiChat.apiKey": "sk-xxxxxxxx",
-  "aiChat.modelName": "deepseek-chat",
-  "aiChat.customHeaders": {
-    "Authorization": "Bearer sk-xxxxxxxx",
-    "User-Agent": "VSCode-AI-Chat/1.0"
+  "Authorization": "Bearer sk-xxxxxxxx",
+  "User-Agent": "VSCode-AI-Chat/1.0"
+}
+```
+- `aiChat.customBodyFields`:
+```json
+{
+  "stream": false
+}
+```
+- `aiChat.overrideDefaultBody`: `false`
+
+---
+
+### 5. MCP服务器配置 (mcpServers)
+
+配置 MCP (Model Context Protocol) 服务器来扩展 AI 助手的功能。
+
+#### 配置格式：
+在 VSCode 设置中的 `aiChat.mcpServers` 字段输入以下 JSON 数组：
+
+```json
+[
+  {
+    "name": "filesystem",
+    "type": "stdio",
+    "stdio": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/path/to/directory"]
+    }
   },
-  "aiChat.customBodyFields": {
-    "stream": false
+  {
+    "name": "git",
+    "type": "stdio",
+    "stdio": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-git", "--repository", "/path/to/repo"]
+    }
   },
-  "aiChat.overrideDefaultBody": false
+  {
+    "name": "sse-server",
+    "type": "sse",
+    "sse": "http://localhost:3000/sse"
+  },
+  {
+    "name": "websocket-server",
+    "type": "websocket",
+    "websocket": "ws://localhost:3000/ws"
+  }
+]
+```
+
+#### 服务器类型说明：
+
+- **stdio**: 标准输入输出通信方式，适合本地进程
+- **sse**: Server-Sent Events 通信方式，适合 HTTP 服务
+- **websocket**: WebSocket 通信方式，适合实时双向通信
+
+#### 常用 MCP 服务器：
+
+1. **文件系统访问**：
+```json
+{
+  "name": "filesystem",
+  "type": "stdio",
+  "stdio": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-filesystem", "/your/workspace/path"]
+  }
+}
+```
+
+2. **Git 仓库操作**：
+```json
+{
+  "name": "git",
+  "type": "stdio",
+  "stdio": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-git", "--repository", "/your/repo/path"]
+  }
 }
 ```
 
@@ -130,12 +280,13 @@
 ### 1. 动态参数调整
 通过配置不同的参数来调整AI输出：
 
+在 `aiChat.customBodyFields` 字段中配置：
+
 ```json
 {
-  "aiChat.customBodyFields": {
-    "temperature": 0.1,    // 低温度：更保守的回答
-    "top_p": 0.9,         // 核采样
-    "frequency_penalty": 0.5, // 降低重复性
+  "temperature": 0.1,    // 低温度：更保守的回答
+  "top_p": 0.9,         // 核采样
+  "frequency_penalty": 0.5, // 降低重复性
     "presence_penalty": 0.3   // 增加话题多样性
   }
 }
