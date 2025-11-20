@@ -61,7 +61,16 @@ export class McpManager implements vscode.Disposable {
             version: "1.0.0" 
         },{capabilities: {tools: true}});
         if(config.type === 'stdio' && config.stdio) {
-            const transport = new StdioClientTransport(config.stdio);
+            // 替换 ${workspaceFolder} 为实际的工作区路径
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            const processedArgs = config.stdio.args.map(arg => 
+                arg.replace(/\$\{workspaceFolder\}/g, workspaceFolder || '')
+            );
+            const stdioConfig = {
+                ...config.stdio,
+                args: processedArgs
+            };
+            const transport = new StdioClientTransport(stdioConfig);
             await mcpCli.connect(transport);
         }
         if(config.type === 'sse' && config.sse) {

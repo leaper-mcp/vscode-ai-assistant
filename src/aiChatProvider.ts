@@ -8,10 +8,13 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
     private aiService: AiService;
     private chatHistory: ChatMessage[] = [];
     private context: vscode.ExtensionContext;
+    private mcpManager?: any;
+    private selectedMcpServers: string[] = [];
 
-    constructor(context: vscode.ExtensionContext) {
+    constructor(context: vscode.ExtensionContext, mcpManager?: any) {
         this.context = context;
-        this.aiService = new AiService();
+        this.mcpManager = mcpManager;
+        this.aiService = new AiService(mcpManager);
         this.loadChatHistory();
     }
 
@@ -49,6 +52,23 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
                 case 'toggleTools':
                     await this.toggleTools(data.enabled);
                     break;
+                case 'requestMcpServers':
+                    this.sendMcpServers();
+                    break;
+                case 'updateMcpSelection':
+                    this.selectedMcpServers = data.selectedMcpServers || [];
+                    this.aiService.setSelectedMcpServers(this.selectedMcpServers);
+                    // 显示状态消息
+                    if (this._view) {
+                        const statusMessage = this.selectedMcpServers.length > 0 
+                            ? `已启用 ${this.selectedMcpServers.length} 个MCP服务器: ${this.selectedMcpServers.join(', ')}`
+                            : '已禁用所有MCP服务器';
+                        this._view.webview.postMessage({
+                            type: 'status',
+                            message: statusMessage
+                        });
+                    }
+                    break;
             }
         });
 
@@ -56,6 +76,7 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
         webviewView.onDidChangeVisibility(() => {
             if (webviewView.visible) {
                 this.updateWebview();
+                this.sendMcpServers();
             }
         });
     }
@@ -198,6 +219,16 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
             this._view.webview.postMessage({
                 type: 'status',
                 message: statusMessage
+            });
+        }
+    }
+
+    private sendMcpServers() {
+        if (this._view && this.mcpManager) {
+            const servers = this.mcpManager.getConnectedServers();
+            this._view.webview.postMessage({
+                type: 'updateMcpServers',
+                mcpServers: servers
             });
         }
     }

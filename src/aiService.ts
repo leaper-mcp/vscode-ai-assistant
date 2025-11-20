@@ -33,9 +33,12 @@ export interface AiConfig {
 
 export class AiService {
     private config: AiConfig;
+    private mcpManager?: any;
+    private selectedMcpServers: string[] = [];
 
-    constructor() {
+    constructor(mcpManager?: any) {
         this.config = this.loadConfig();
+        this.mcpManager = mcpManager;
         
         // 监听配置变化
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -87,6 +90,36 @@ export class AiService {
         };
     }
 
+    private async getMcpTools(): Promise<any[]> {
+        const mcpTools: any[] = [];
+        
+        if (this.mcpManager && this.selectedMcpServers.length > 0) {
+            for (const serverName of this.selectedMcpServers) {
+                try {
+                    const toolsList = await this.mcpManager.listTools(serverName);
+                    console.log(`MCP服务器 ${serverName} 的工具列表:`, toolsList);
+                    if (toolsList && toolsList.tools) {
+                        // 为每个MCP工具添加前缀，格式为 serverName_toolName
+                        for (const tool of toolsList.tools) {
+                            mcpTools.push({
+                                type: "function",
+                                function: {
+                                    name: `${serverName}_${tool.name}`,
+                                    description: `[MCP:${serverName}] ${tool.description}`,
+                                    parameters: tool.inputSchema
+                                }
+                            });
+                        }
+                    }
+                } catch (error: any) {
+                    console.warn(`获取MCP服务器 ${serverName} 的工具列表失败:`, error.message);
+                }
+            }
+        }
+        
+        return mcpTools;
+    }
+
     public async sendMessage(messages: ChatMessage[]): Promise<string> {
         if (!this.config.apiKey && !this.config.customHeaders['Authorization']) {
             throw new Error('请先配置API密钥或自定义Authorization头');
@@ -118,6 +151,13 @@ export class AiService {
             let currentIteration = 0;
 
             while (currentIteration < maxIterations) {
+                // 获取动态工具列表（包括MCP工具）
+                const allTools = this.config.enableTools ? [...tools] : [];
+                if (this.config.enableTools) {
+                    const mcpTools = await this.getMcpTools();
+                    allTools.push(...mcpTools);
+                }
+
                 // 构建默认请求体
                 const defaultBody: any = {
                     model: this.config.modelName,
@@ -133,7 +173,7 @@ export class AiService {
 
                 // 只有在启用工具时才添加工具相关字段
                 if (this.config.enableTools) {
-                    defaultBody.tools = tools;
+                    defaultBody.tools = allTools;
                     defaultBody.tool_choice = "auto";
                 }
                 console.log('overrideDefaultBody:', this.config.overrideDefaultBody);
@@ -288,6 +328,13 @@ export class AiService {
             let currentIteration = 0;
 
             while (currentIteration < maxIterations) {
+                // 获取动态工具列表（包括MCP工具）
+                const allTools = this.config.enableTools ? [...tools] : [];
+                if (this.config.enableTools) {
+                    const mcpTools = await this.getMcpTools();
+                    allTools.push(...mcpTools);
+                }
+
                 // 构建默认请求体
                 const defaultBody: any = {
                     model: this.config.modelName,
@@ -304,7 +351,7 @@ export class AiService {
 
                 // 只有在启用工具时才添加工具相关字段
                 if (this.config.enableTools) {
-                    defaultBody.tools = tools;
+                    defaultBody.tools = allTools;
                     defaultBody.tool_choice = "auto";
                 }
 
@@ -508,6 +555,25 @@ export class AiService {
     private async executeTool(functionName: string, args: any): Promise<any> {
         console.log(`执行工具: ${functionName}`, args);
         
+        // 首先检查是否是MCP工具（格式：serverName_toolName）
+        const mcpMatch = functionName.match(/^([^_]+)_(.+)$/);
+        if (mcpMatch && this.mcpManager) {
+            const [, serverName, toolName] = mcpMatch;
+            
+            // 检查是否选择了该MCP服务器
+            if (this.selectedMcpServers.includes(serverName)) {
+                try {
+                    const result = await this.mcpManager.callTool(serverName, toolName, args);
+                    return result;
+                } catch (error: any) {
+                    throw new Error(`MCP工具调用失败 (${serverName}.${toolName}): ${error.message}`);
+                }
+            } else {
+                throw new Error(`MCP服务器 ${serverName} 未启用`);
+            }
+        }
+        
+        // 然后检查内置工具
         switch (functionName) {
             case 'getProjectPath':
                 return await toolHandlers.getProjectPath();
@@ -532,6 +598,10 @@ export class AiService {
             default:
                 throw new Error(`未知的工具函数: ${functionName}`);
         }
+    }
+
+    public setSelectedMcpServers(servers: string[]): void {
+        this.selectedMcpServers = servers;
     }
 
     public async testConnection(): Promise<boolean> {

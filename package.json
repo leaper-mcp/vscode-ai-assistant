@@ -120,7 +120,7 @@
         "aiChat.mcpServers": {
           "type": "string",
           "default": "[]",
-          "description": "MCP服务器配置列表（JSON数组格式），例如[{\"name\":\"filesystem\",\"type\":\"stdio\",\"stdio\":{\"command\":\"npx\",\"args\":[\"@modelcontextprotocol/server-filesystem\",\"/path/to/directory\"]}}]",
+          "description": "MCP服务器配置列表（开发中...）（JSON数组格式），例如[{\"name\":\"filesystem\",\"type\":\"stdio\",\"stdio\":{\"command\":\"npx\",\"args\":[\"@modelcontextprotocol/server-filesystem\",\"${workspaceFolder}\"]}}]",
           "scope": "application"
         }
       }

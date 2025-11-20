@@ -17,10 +17,13 @@ export const App: React.FC = () => {
     const [toolsEnabled, setToolsEnabled] = useState(false);
     const [streamingMessageId, setStreamingMessageId] = useState<number | undefined>();
     const [isLoading, setIsLoading] = useState(false);
+    const [mcpServers, setMcpServers] = useState<string[]>([]);
+    const [selectedMcpServers, setSelectedMcpServers] = useState<string[]>([]);
     
     useEffect(() => {
         // 请求初始数据
         vscode.postMessage({ type: 'requestHistory' });
+        vscode.postMessage({ type: 'requestMcpServers' });
 
         // 监听来自扩展的消息
         const handleMessage = (event: MessageEvent<WebviewMessage>) => {
@@ -69,6 +72,10 @@ export const App: React.FC = () => {
                 case 'status':
                     console.log('Status:', message.message);
                     break;
+                    
+                case 'updateMcpServers':
+                    setMcpServers(message.mcpServers || []);
+                    break;
             }
         };
 
@@ -95,6 +102,14 @@ export const App: React.FC = () => {
         });
     };
 
+    const handleMcpSelectionChange = (servers: string[]) => {
+        setSelectedMcpServers(servers);
+        vscode.postMessage({
+            type: 'updateMcpSelection',
+            selectedMcpServers: servers
+        });
+    };
+
     return (
         <div className="app">
             <ChatContainer 
@@ -104,6 +119,9 @@ export const App: React.FC = () => {
             <Toolbar 
                 toolsEnabled={toolsEnabled}
                 onToggleTools={handleToggleTools}
+                mcpServers={mcpServers}
+                selectedMcpServers={selectedMcpServers}
+                onMcpSelectionChange={handleMcpSelectionChange}
             />
             <InputArea 
                 onSendMessage={handleSendMessage}

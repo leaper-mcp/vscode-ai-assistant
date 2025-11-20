@@ -102,7 +102,7 @@ body {
 
 .toolbar {
     display: flex;
-    gap: 4px;
+    gap: 8px;
     margin-bottom: 8px;
     flex-wrap: wrap;
     align-items: center;
@@ -163,6 +163,40 @@ input:checked+.slider:before {
 .switch-label {
     font-size: 0.85em;
     color: var(--vscode-foreground);
+}
+
+.mcp-selector {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mcp-label {
+    font-size: 0.85em;
+    color: var(--vscode-foreground);
+    font-weight: bold;
+    min-width: 60px;
+}
+
+.mcp-checkbox-container {
+    display: flex;
+    align-items: center;
+}
+
+.mcp-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8em;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+}
+
+.mcp-checkbox-label input[type="checkbox"] {
+    margin: 0;
+    width: 14px;
+    height: 14px;
 }
 
 .thinking {

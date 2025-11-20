@@ -5,8 +5,8 @@ import { McpManager } from './mcpManager';
 export function activate(context: vscode.ExtensionContext) {
     console.log('AI Chat Assistant 插件已激活');
 
-    const aiChatProvider = new AiChatProvider(context);
     const mcpManager = new McpManager(context);
+    const aiChatProvider = new AiChatProvider(context, mcpManager);
 
     // 注册Webview Provider
     vscode.window.registerWebviewViewProvider('aiChatView', aiChatProvider);
