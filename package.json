@@ -3,6 +3,10 @@
   "displayName": "AI Chat Assistant",
   "description": "AI对话助手，支持多种模型配置和MCP接入",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LeaperMcp/ai-chat-assistant.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -144,22 +148,23 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "compile:webview": "tsc --project tsconfig.webview.json",
     "build": "npm run compile && npm run build:webview",
     "build:webview": "vite build",
-    "dev:webview": "vite build --watch"
+    "dev:webview": "vite build --watch",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "18.x",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/vscode": "^1.85.0",
+    "@vitejs/plugin-react": "^4.0.0",
     "typescript": "^5.0.4",
     "vite": "^5.0.0",
-    "@vitejs/plugin-react": "^4.0.0"
+    "vsce": "^2.15.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
