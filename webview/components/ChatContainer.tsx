@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChatMessage } from './ChatMessage';
 import { ChatMessage as ChatMessageType } from '../types';
+import styles from './ChatContainer.module.css';
 
 interface ChatContainerProps {
     messages: ChatMessageType[];
@@ -21,7 +22,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
     if (messages.length === 0) {
         return (
-            <div className="chat-container" ref={containerRef}>
+            <div className={styles.chatContainer} ref={containerRef}>
                 <div style={{ 
                     textAlign: 'center', 
                     opacity: 0.6, 
@@ -34,7 +35,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     }
 
     return (
-        <div className="chat-container" ref={containerRef}>
+        <div className={styles.chatContainer} ref={containerRef}>
             {messages.map((message, index) => (
                 <ChatMessage
                     key={index}

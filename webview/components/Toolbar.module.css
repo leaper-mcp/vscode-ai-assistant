@@ -1,0 +1,211 @@
+.toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.switchContainer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--vscode-button-secondaryBackground);
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--vscode-button-background);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.switchLabel {
+    font-size: 0.85em;
+    color: var(--vscode-foreground);
+}
+
+.mcpSelector {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    background-color: var(--vscode-editor-background);
+}
+
+.mcpHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.mcpLabel {
+    font-size: 0.85em;
+    color: var(--vscode-foreground);
+    font-weight: bold;
+}
+
+.mcpActions {
+    display: flex;
+    gap: 4px;
+}
+
+.mcpActionButton {
+    padding: 2px 6px;
+    font-size: 0.7em;
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 2px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    cursor: pointer;
+}
+
+.mcpActionButton:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.mcpList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mcpItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.mcpItem:last-child {
+    border-bottom: none;
+}
+
+.mcpCheckboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8em;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    flex: 1;
+}
+
+.mcpCheckboxLabel.disabled {
+    color: var(--vscode-disabledForeground);
+    cursor: not-allowed;
+}
+
+.mcpCheckboxLabel input[type="checkbox"] {
+    margin: 0;
+    width: 14px;
+    height: 14px;
+}
+
+.mcpCheckboxLabel.disabled input[type="checkbox"] {
+    cursor: not-allowed;
+}
+
+.mcpServerName {
+    flex: 1;
+}
+
+.mcpServerName.connected {
+    color: var(--vscode-foreground);
+}
+
+.mcpServerName.disconnected {
+    color: var(--vscode-disabledForeground);
+    text-decoration: line-through;
+}
+
+.mcpStatusIndicator {
+    font-size: 0.7em;
+    padding: 1px 4px;
+    border-radius: 2px;
+    margin-left: 4px;
+}
+
+.mcpStatusIndicator.connected {
+    background-color: var(--vscode-testing-iconPassed);
+    color: var(--vscode-editor-foreground);
+}
+
+.mcpStatusIndicator.disconnected {
+    background-color: var(--vscode-errorForeground);
+    color: var(--vscode-editor-background);
+}
+
+.mcpReconnectButton {
+    padding: 2px 6px;
+    font-size: 0.7em;
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 2px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.mcpReconnectButton:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.mcpDisconnectButton {
+    padding: 2px 6px;
+    font-size: 0.7em;
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 2px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.mcpDisconnectButton:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}

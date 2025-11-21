@@ -3,6 +3,7 @@ import { ChatContainer } from './ChatContainer';
 import { Toolbar } from './Toolbar';
 import { InputArea } from './InputArea';
 import { ChatMessage, ExtensionMessage, WebviewMessage } from '../types';
+import styles from './App.module.css';
 
 // VSCode API 全局变量
 declare global {
@@ -127,7 +128,7 @@ export const App: React.FC = () => {
     };
 
     return (
-        <div className="app">
+        <div className={styles.app}>
             <ChatContainer 
                 messages={messages} 
                 streamingMessageId={streamingMessageId}

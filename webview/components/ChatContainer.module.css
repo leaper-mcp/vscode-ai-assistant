@@ -1,0 +1,9 @@
+.chatContainer {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 8px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    padding: 8px;
+    background-color: var(--vscode-editor-background);
+}

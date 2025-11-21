@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { McpServerInfo } from '../types';
+import styles from './Toolbar.module.css';
 
 interface ToolbarProps {
     toolsEnabled: boolean;
@@ -84,47 +85,47 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     };
 
     return (
-        <div className="toolbar">
-            <div className="switch-container">
-                <label className="switch">
+        <div className={styles.toolbar}>
+            <div className={styles.switchContainer}>
+                <label className={styles.switch}>
                     <input
                         type="checkbox"
                         checked={toolsEnabled}
                         onChange={(e) => onToggleTools(e.target.checked)}
                     />
-                    <span className="slider"></span>
+                    <span className={styles.slider}></span>
                 </label>
-                <span className="switch-label">Agent模式(如果模型支持则可能会读取并修改代码)</span>
+                <span className={styles.switchLabel}>Agent模式(如果模型支持则可能会读取并修改代码)</span>
             </div>
             
             {toolsEnabled && mcpServerInfos.length > 0 && (
-                <div className="mcp-selector">
-                    <div className="mcp-header">
-                        <span className="mcp-label">MCP服务:</span>
-                        <div className="mcp-actions">
+                <div className={styles.mcpSelector}>
+                    <div className={styles.mcpHeader}>
+                        <span className={styles.mcpLabel}>MCP服务:</span>
+                        <div className={styles.mcpActions}>
                             <button 
-                                className="mcp-action-button"
+                                className={styles.mcpActionButton}
                                 onClick={handleConnectAll}
                                 title="连接所有未连接的服务"
                             >
                                 连接全部
                             </button>
                             <button 
-                                className="mcp-action-button"
+                                className={styles.mcpActionButton}
                                 onClick={handleDisconnectAll}
                                 title="断开所有已连接的服务"
                             >
                                 断开全部
                             </button>
                             <button 
-                                className="mcp-action-button"
+                                className={styles.mcpActionButton}
                                 onClick={handleSelectAll}
                                 title="选择所有已连接的服务"
                             >
                                 全选
                             </button>
                             <button 
-                                className="mcp-action-button"
+                                className={styles.mcpActionButton}
                                 onClick={handleDeselectAll}
                                 title="取消选择所有服务"
                             >
@@ -132,33 +133,33 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                             </button>
                         </div>
                     </div>
-                    <div className="mcp-list">
+                    <div className={styles.mcpList}>
                         {mcpServerInfos.map((serverInfo) => {
                             const isConnected = serverInfo.connected;
                             const isSelected = selectedMcpServers.includes(serverInfo.name);
                             
                             return (
-                                <div key={serverInfo.name} className="mcp-item">
-                                    <label className={`mcp-checkbox-label ${!isConnected ? 'disabled' : ''}`}>
+                                <div key={serverInfo.name} className={styles.mcpItem}>
+                                    <label className={`${styles.mcpCheckboxLabel} ${!isConnected ? styles.disabled : ''}`}>
                                         <input
                                             type="checkbox"
                                             checked={isSelected}
                                             disabled={!isConnected}
                                             onChange={(e) => handleMcpToggle(serverInfo.name, e.target.checked)}
                                         />
-                                        <span className={`mcp-server-name ${isConnected ? 'connected' : 'disconnected'}`}>
+                                        <span className={`${styles.mcpServerName} ${isConnected ? styles.connected : styles.disconnected}`}>
                                             {serverInfo.name}
                                         </span>
                                         {!isConnected && (
-                                            <span className="mcp-status-indicator disconnected">未连接</span>
+                                            <span className={`${styles.mcpStatusIndicator} ${styles.disconnected}`}>未连接</span>
                                         )}
                                         {isConnected && (
-                                            <span className="mcp-status-indicator connected">已连接</span>
+                                            <span className={`${styles.mcpStatusIndicator} ${styles.connected}`}>已连接</span>
                                         )}
                                     </label>
                                     {!isConnected && (
                                         <button 
-                                            className="mcp-reconnect-button"
+                                            className={styles.mcpReconnectButton}
                                             onClick={(e) => handleConnect(serverInfo.name, e)}
                                             title="连接此服务器"
                                         >
@@ -167,7 +168,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                                     )}
                                     {isConnected && (
                                         <button 
-                                            className="mcp-disconnect-button"
+                                            className={styles.mcpDisconnectButton}
                                             onClick={(e) => handleDisconnect(serverInfo.name, e)}
                                             title="断开此服务器"
                                         >

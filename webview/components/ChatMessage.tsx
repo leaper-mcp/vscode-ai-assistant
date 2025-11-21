@@ -1,6 +1,7 @@
 import React from 'react';
 import { marked } from 'marked';
 import { ChatMessage as ChatMessageType } from '../types';
+import styles from './ChatMessage.module.css';
 
 interface ChatMessageProps {
     message: ChatMessageType;
@@ -17,14 +18,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     
     return (
         <div 
-            className={`message ${isUser ? 'user-message' : 'assistant-message'}`}
+            className={`${styles.message} ${isUser ? styles.userMessage : styles.assistantMessage}`}
             data-message-id={messageId}
         >
-            <div className="message-role">
+            <div className={styles.messageRole}>
                 {isUser ? '用户' : 'AI助手'}
             </div>
             <div 
-                className={isUser ? 'pre' : `markdown-content ${isStreaming ? 'streaming' : ''}`}
+                className={isUser ? styles.pre : `${styles.markdownContent} ${isStreaming ? styles.streaming : ''}`}
                 data-message-content={messageId}
             >
                 {isUser ? (

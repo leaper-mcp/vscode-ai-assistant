@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import styles from './InputArea.module.css';
 
 interface InputAreaProps {
     onSendMessage: (message: string) => void;
@@ -27,7 +28,7 @@ export const InputArea: React.FC<InputAreaProps> = ({
     };
 
     return (
-        <div className="input-container">
+        <div className={styles.inputContainer}>
             <input
                 type="text"
                 id="messageInput"
@@ -36,9 +37,10 @@ export const InputArea: React.FC<InputAreaProps> = ({
                 onKeyDown={handleKeyDown}
                 placeholder="输入消息..."
                 disabled={disabled}
+                className={styles.messageInput}
             />
             <button 
-                className="button" 
+                className={styles.button} 
                 onClick={handleSubmit}
                 disabled={disabled}
             >

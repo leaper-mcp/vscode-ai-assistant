@@ -1,0 +1,165 @@
+.message {
+    margin-bottom: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    word-wrap: break-word;
+}
+
+.userMessage {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    margin-left: 10%;
+}
+
+.assistantMessage {
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    margin-right: 10%;
+}
+
+.messageRole {
+    font-weight: bold;
+    margin-bottom: 2px;
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.pre {
+    white-space: pre-wrap;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.markdownContent {
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.markdownContent h1,
+.markdownContent h2,
+.markdownContent h3,
+.markdownContent h4,
+.markdownContent h5,
+.markdownContent h6 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--vscode-foreground);
+}
+
+.markdownContent h1 {
+    font-size: 1.5em;
+}
+
+.markdownContent h2 {
+    font-size: 1.3em;
+}
+
+.markdownContent h3 {
+    font-size: 1.1em;
+}
+
+.markdownContent p {
+    margin: 8px 0;
+}
+
+.markdownContent code {
+    background-color: var(--vscode-textBlockQuote-background);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+}
+
+.markdownContent pre {
+    background-color: var(--vscode-textBlockQuote-background);
+    border: 1px solid var(--vscode-textBlockQuote-border);
+    border-radius: 4px;
+    padding: 8px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.markdownContent pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.markdownContent ul,
+.markdownContent ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.markdownContent li {
+    margin: 4px 0;
+}
+
+.markdownContent blockquote {
+    border-left: 4px solid var(--vscode-textBlockQuote-border);
+    background-color: var(--vscode-textBlockQuote-background);
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-style: italic;
+}
+
+.markdownContent table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.markdownContent th,
+.markdownContent td {
+    border: 1px solid var(--vscode-panel-border);
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.markdownContent th {
+    background-color: var(--vscode-textBlockQuote-background);
+    font-weight: bold;
+}
+
+.markdownContent a {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: none;
+}
+
+.markdownContent a:hover {
+    text-decoration: underline;
+}
+
+.markdownContent strong {
+    font-weight: bold;
+}
+
+.markdownContent em {
+    font-style: italic;
+}
+
+.streaming {
+    position: relative;
+}
+
+.streaming::after {
+    content: '▊';
+    animation: blink 1s infinite;
+    color: var(--vscode-editor-foreground);
+    opacity: 0.8;
+}
+
+@keyframes blink {
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
