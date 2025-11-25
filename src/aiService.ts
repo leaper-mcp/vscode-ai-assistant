@@ -554,6 +554,12 @@ export class AiService {
 
     private async executeTool(functionName: string, args: any): Promise<any> {
         console.log(`执行工具: ${functionName}`, args);
+        // 然后检查内置工具
+        if(toolHandlers[functionName]) {
+            return await toolHandlers[functionName](args);
+        } else {
+            console.log(`未知的内置工具函数: ${functionName}`);
+        }
         
         // 首先检查是否是MCP工具（格式：serverName_toolName）
         const mcpMatch = functionName.match(/^([^_]+)_(.+)$/);
@@ -572,43 +578,9 @@ export class AiService {
                 throw new Error(`MCP服务器 ${serverName} 未启用`);
             }
         }
+        throw new Error(`未知的工具函数: ${functionName}`);
         
-        // 然后检查内置工具
-        switch (functionName) {
-            case 'getProjectPath':
-                return await toolHandlers.getProjectPath();
-            case 'getCurrentFilePath':
-                return await toolHandlers.getCurrentFilePath();
-            case 'getAllOpenFiles':
-                return await toolHandlers.getAllOpenFiles();
-            case 'getCurrentSelection':
-                return await toolHandlers.getCurrentSelection();
-            case 'getCurrentLineContent':
-                return await toolHandlers.getCurrentLineContent();
-            case 'getCursorInfo':
-                return await toolHandlers.getCursorInfo();
-            case 'openFileToEdit':
-                return await toolHandlers.openFileToEdit(args);
-            // vscode.workspace.fs 方法
-            case 'fsReadFile':
-                return await toolHandlers.fsReadFile(args);
-            case 'fsWriteFile':
-                return await toolHandlers.fsWriteFile(args);
-            case 'fsDelete':
-                return await toolHandlers.fsDelete(args);
-            case 'fsRename':
-                return await toolHandlers.fsRename(args);
-            case 'fsCreateDirectory':
-                return await toolHandlers.fsCreateDirectory(args);
-            case 'fsReadDirectory':
-                return await toolHandlers.fsReadDirectory(args);
-            case 'fsStat':
-                return await toolHandlers.fsStat(args);
-            case 'fsCopy':
-                return await toolHandlers.fsCopy(args);
-            default:
-                throw new Error(`未知的工具函数: ${functionName}`);
-        }
+        
     }
 
     public setSelectedMcpServers(servers: string[]): void {
