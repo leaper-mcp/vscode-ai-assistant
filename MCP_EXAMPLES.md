@@ -9,19 +9,17 @@
 ```json
 [
   {
-    "name": "filesystem",
+    "name": "memory",
     "type": "stdio",
     "stdio": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
-    }
-  },
-  {
-    "name": "git",
-    "type": "stdio", 
-    "stdio": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-git", "--repository", "${workspaceFolder}"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${workspaceFolder}/memory.jsonl"
+      }
     }
   },
   {
@@ -95,13 +93,19 @@
 自动替换为当前工作区的路径。例如：
 ```json
 {
-  "name": "filesystem",
-  "type": "stdio",
-  "stdio": {
-    "command": "npx",
-    "args": ["@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
+    "name": "memory",
+    "type": "stdio",
+    "stdio": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${workspaceFolder}/memory.jsonl"
+      }
+    }
   }
-}
 ```
 
 ## 使用说明
@@ -122,13 +126,19 @@ AI会自动发现MCP工具，调用格式为：
 ### 文件系统工具
 ```json
 {
-  "name": "filesystem",
-  "type": "stdio", 
-  "stdio": {
-    "command": "npx",
-    "args": ["@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
+    "name": "memory",
+    "type": "stdio",
+    "stdio": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${workspaceFolder}/memory.jsonl"
+      }
+    }
   }
-}
 ```
 
 ### Git工具

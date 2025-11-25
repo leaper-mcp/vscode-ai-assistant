@@ -213,19 +213,17 @@
 ```json
 [
   {
-    "name": "filesystem",
+    "name": "memory",
     "type": "stdio",
     "stdio": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-filesystem", "/path/to/directory"]
-    }
-  },
-  {
-    "name": "git",
-    "type": "stdio",
-    "stdio": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-git", "--repository", "/path/to/repo"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${workspaceFolder}/memory.jsonl"
+      }
     }
   },
   {
@@ -249,16 +247,22 @@
 
 #### 常用 MCP 服务器：
 
-1. **文件系统访问**：
+1. **文件记忆**：
 ```json
 {
-  "name": "filesystem",
-  "type": "stdio",
-  "stdio": {
-    "command": "npx",
-    "args": ["@modelcontextprotocol/server-filesystem", "/your/workspace/path"]
+    "name": "memory",
+    "type": "stdio",
+    "stdio": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${workspaceFolder}/memory.jsonl"
+      }
+    }
   }
-}
 ```
 
 2. **Git 仓库操作**：

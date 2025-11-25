@@ -51,19 +51,17 @@
 ```json
 [
   {
-    "name": "filesystem",
+    "name": "memory",
     "type": "stdio",
     "stdio": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-filesystem", "/path/to/directory"]
-    }
-  },
-  {
-    "name": "git",
-    "type": "stdio",
-    "stdio": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-git", "--repository", "/path/to/repo"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${workspaceFolder}/memory.jsonl"
+      }
     }
   }
 ]
