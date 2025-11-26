@@ -29,6 +29,7 @@ export interface AiConfig {
     enableStream: boolean;
     enableTools: boolean;
     systemRole: string;
+    enabledTools: string[];
 }
 
 export class AiService {
@@ -75,6 +76,23 @@ export class AiService {
             }
         }
         
+        // 解析启用的工具列表
+        let enabledTools: string[] = [];
+        const enabledToolsStr = config.get('enabledTools', '') as string;
+        if (enabledToolsStr && enabledToolsStr.trim()) {
+            try {
+                enabledTools = JSON.parse(enabledToolsStr);
+                if (!Array.isArray(enabledTools)) {
+                    console.warn('enabledTools 不是数组格式，将重置为空数组');
+                    enabledTools = [];
+                }
+            } catch (e: any) {
+                console.error('解析 enabledTools JSON 失败:', e);
+                vscode.window.showErrorMessage(`enabledTools JSON 格式错误: ${e.message}`);
+                enabledTools = [];
+            }
+        }
+        
         return {
             apiBaseUrl: config.get('apiBaseUrl', 'https://api.openai.com/v1'),
             apiKey: config.get('apiKey', ''),
@@ -86,7 +104,8 @@ export class AiService {
             overrideDefaultBody: config.get('overrideDefaultBody', false),
             enableStream: config.get('enableStream', true),
             enableTools: config.get('enableTools', true),
-            systemRole: config.get('systemRole', '')
+            systemRole: config.get('systemRole', ''),
+            enabledTools: enabledTools
         };
     }
 
@@ -118,6 +137,20 @@ export class AiService {
         }
         
         return mcpTools;
+    }
+
+    private filterTools(builtInTools: any[], mcpTools: any[]): any[] {
+        // 过滤内置工具
+        let filteredBuiltInTools = builtInTools;
+        if (this.config.enabledTools && this.config.enabledTools.length > 0) {
+            filteredBuiltInTools = builtInTools.filter(tool => {
+                const toolName = tool.function?.name;
+                return this.config.enabledTools.includes(toolName);
+            });
+        }
+        
+        // MCP工具不过滤，全部启用
+        return [...filteredBuiltInTools, ...mcpTools];
     }
 
     public async sendMessage(messages: ChatMessage[]): Promise<string> {
@@ -152,10 +185,11 @@ export class AiService {
 
             while (currentIteration < maxIterations) {
                 // 获取动态工具列表（包括MCP工具）
-                const allTools = this.config.enableTools ? [...tools] : [];
+                let allTools: any[] = [];
                 if (this.config.enableTools) {
                     const mcpTools = await this.getMcpTools();
-                    allTools.push(...mcpTools);
+                    // 分别处理内置工具和MCP工具
+                    allTools = this.filterTools([...tools], mcpTools);
                 }
 
                 // 构建默认请求体
@@ -329,10 +363,11 @@ export class AiService {
 
             while (currentIteration < maxIterations) {
                 // 获取动态工具列表（包括MCP工具）
-                const allTools = this.config.enableTools ? [...tools] : [];
+                let allTools: any[] = [];
                 if (this.config.enableTools) {
                     const mcpTools = await this.getMcpTools();
-                    allTools.push(...mcpTools);
+                    // 分别处理内置工具和MCP工具
+                    allTools = this.filterTools([...tools], mcpTools);
                 }
 
                 // 构建默认请求体

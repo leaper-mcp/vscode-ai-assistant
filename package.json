@@ -123,6 +123,12 @@
           "default": "[]",
           "description": "MCP服务器配置列表（JSON数组格式），例如[{\"name\":\"memory\",\"type\":\"stdio\",\"stdio\":{\"command\":\"npx\",\"args\":[\"-y\",\"@modelcontextprotocol/server-memory\"],\"env\":{\"MEMORY_FILE_PATH\":\"${workspaceFolder}/memory.jsonl\"}}}]",
           "scope": "application"
+        },
+        "aiChat.enabledTools": {
+          "type": "string",
+          "default": "[]",
+          "description": "启用的工具列表（JSON数组格式），为空则启用所有工具。例如[\"getProjectPath\",\"getCurrentFilePath\",\"fsReadFile\"]。支持内置工具和MCP工具（格式：serverName_toolName）",
+          "scope": "application"
         }
       }
     },
