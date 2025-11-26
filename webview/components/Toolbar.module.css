@@ -209,3 +209,45 @@ input:checked + .slider:before {
 .mcpDisconnectButton:hover {
     background-color: var(--vscode-button-hoverBackground);
 }
+
+.mcpManageButton {
+    padding: 2px 6px;
+    font-size: 0.7em;
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 2px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+}
+
+.mcpManageButton:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.mcpManageButton:active {
+    background-color: var(--vscode-button-background);
+    transform: scale(0.95);
+}
+
+.mcpDeleteButton {
+    padding: 2px 4px;
+    font-size: 0.8em;
+    border: 1px solid var(--vscode-errorBorder);
+    border-radius: 2px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-errorForeground);
+    cursor: pointer;
+    margin-left: 4px;
+    min-width: 24px;
+    height: 20px;
+}
+
+.mcpDeleteButton:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+    border-color: var(--vscode-errorForeground);
+}
+
+.mcpDeleteButton:active {
+    background-color: var(--vscode-button-secondaryBackground);
+    transform: scale(0.9);
+}

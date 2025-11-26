@@ -79,6 +79,13 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
                 case 'disconnectMcpServer':
                     await this.disconnectMcpServer(data.serverName);
                     break;
+                case 'addMcpServer':
+                    await this.addMcpServer();
+                    break;
+                case 'deleteSpecificServer':
+                    await this.disconnectMcpServer(data.serverName);
+                    await this.deleteSpecificMcpServer(data.serverName);
+                    break;
             }
         });
 
@@ -238,14 +245,9 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
             // 获取配置的所有MCP服务器和连接状态
             const config = vscode.workspace.getConfiguration('aiChat');
             let allServers: string[] = [];
-            const serversStr = config.get('mcpServers', '[]') as string;
-            if (serversStr && serversStr.trim()) {
-                try {
-                    const serversConfig = JSON.parse(serversStr);
-                    allServers = serversConfig.map((s: any) => s.name);
-                } catch (e: any) {
-                    console.error('解析 mcpServers JSON 失败:', e);
-                }
+            const serversConfig = config.get('mcpServers', []) as any[];
+            if (serversConfig && Array.isArray(serversConfig)) {
+                allServers = serversConfig.map((s: any) => s.name).filter(Boolean);
             }
             
             const connectedServers = this.mcpManager.getConnectedServers();
@@ -265,14 +267,9 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
         if (this._view && this.mcpManager) {
             const config = vscode.workspace.getConfiguration('aiChat');
             let allServers: string[] = [];
-            const serversStr = config.get('mcpServers', '[]') as string;
-            if (serversStr && serversStr.trim()) {
-                try {
-                    const serversConfig = JSON.parse(serversStr);
-                    allServers = serversConfig.map((s: any) => s.name);
-                } catch (e: any) {
-                    console.error('解析 mcpServers JSON 失败:', e);
-                }
+            const serversConfig = config.get('mcpServers', []) as any[];
+            if (serversConfig && Array.isArray(serversConfig)) {
+                allServers = serversConfig.map((s: any) => s.name).filter(Boolean);
             }
             
             const connectedServers = this.mcpManager.getConnectedServers();
@@ -353,6 +350,129 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
                 this._view.webview.postMessage({
                     type: 'error',
                     message: `关闭MCP服务器 ${serverName} 失败: ${error.message}`
+                });
+            }
+        }
+    }
+
+    private async addMcpServer(): Promise<void> {
+        const config = vscode.workspace.getConfiguration('aiChat');
+        const servers = config.get('mcpServers', []) as any[];
+        
+        const name = await vscode.window.showInputBox({
+            prompt: '输入MCP服务器名称',
+            validateInput: (value) => {
+                if (!value || value.trim().length === 0) {
+                    return '服务器名称不能为空';
+                }
+                if (servers.some((s: any) => s.name === value.trim())) {
+                    return '服务器名称已存在';
+                }
+                return null;
+            }
+        });
+        
+        if (!name) return;
+        
+        const type = await vscode.window.showQuickPick([
+            { label: 'STDIO', value: 'stdio' },
+            { label: 'SSE', value: 'sse' },
+            { label: 'WebSocket', value: 'websocket' }
+        ], {
+            placeHolder: '选择连接类型'
+        });
+        
+        if (!type) return;
+        
+        let serverConfig: any = {
+            name: name.trim(),
+            type: type.value
+        };
+        
+        if (type.value === 'stdio') {
+            const command = await vscode.window.showInputBox({
+                prompt: '输入执行命令',
+                placeHolder: 'npx'
+            });
+            if (!command) return;
+            
+            const argsInput = await vscode.window.showInputBox({
+                prompt: '输入命令参数（可选，用空格分隔）',
+                placeHolder: '-y @modelcontextprotocol/server-memory'
+            });
+            const args = argsInput ? argsInput.trim().split(/\s+/) : [];
+            
+            serverConfig.stdio = {
+                command: command.trim(),
+                args: args
+            };
+        } else if (type.value === 'sse' || type.value === 'websocket') {
+            const url = await vscode.window.showInputBox({
+                prompt: `输入${type.value === 'sse' ? 'SSE' : 'WebSocket'}连接URL`,
+                placeHolder: type.value === 'sse' 
+                    ? 'https://your-mcp-server.com/sse' 
+                    : 'wss://your-mcp-server.com/ws'
+            });
+            if (!url) return;
+            
+            const configKey = type.value as 'sse' | 'websocket';
+            serverConfig[configKey] = { url: url.trim() };
+        }
+        try {
+            const newServers = [...servers, serverConfig];
+            await config.update('mcpServers', newServers, vscode.ConfigurationTarget.Global);
+            // 更新界面
+            await this.sendAllMcpServers();
+            this.sendMcpServers();
+            
+            if (this._view) {
+                this._view.webview.postMessage({
+                    type: 'status',
+                    message: `MCP服务器 ${name} 已添加`
+                });
+            }
+        } catch (error: any) {
+            if (this._view) {
+                this._view.webview.postMessage({
+                    type: 'error',
+                    message: `添加MCP服务器 ${name} 失败: ${error.message}`
+                });
+            }
+        }
+    }
+
+    private async deleteSpecificMcpServer(serverName?: string) {
+        if (!serverName) {
+            return;
+        }
+        
+        try {
+            // 先断开连接（如果已连接）
+            if (this.mcpManager && this.mcpManager.getConnectedServers().includes(serverName)) {
+                await this.mcpManager.disconnectServer(serverName);
+            }
+            
+            // 从配置中删除
+            const config = vscode.workspace.getConfiguration('aiChat');
+            const servers = config.get('mcpServers', []) as any[];
+            const newServers = servers.filter((s: any) => s.name !== serverName);
+            await config.update('mcpServers', newServers, vscode.ConfigurationTarget.Global);
+            
+            // 更新界面
+            await this.sendAllMcpServers();
+            this.sendMcpServers();
+            
+            if (this._view) {
+                this._view.webview.postMessage({
+                    type: 'status',
+                    message: `MCP服务器 ${serverName} 已删除`
+                });
+            }
+        } catch (error: any) {
+            if (this._view) {
+                this._view.webview.postMessage({
+                    type: 'error',
+                    message: `删除MCP服务器 ${serverName} 失败: ${error.message}`
                 });
             }
         }

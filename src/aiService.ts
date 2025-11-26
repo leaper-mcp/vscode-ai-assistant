@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import {tools, toolHandlers} from './tools';
+import type {McpManager} from './mcpManager';
 
 export interface ChatMessage {
     role: 'user' | 'assistant' | 'system' | 'tool';
@@ -34,7 +35,7 @@ export interface AiConfig {
 
 export class AiService {
     private config: AiConfig;
-    private mcpManager?: any;
+    private mcpManager?: McpManager;
     private selectedMcpServers: string[] = [];
 
     constructor(mcpManager?: any) {
@@ -52,45 +53,19 @@ export class AiService {
     private loadConfig(): AiConfig {
         const config = vscode.workspace.getConfiguration('aiChat');
         
-        // 解析自定义请求头
-        let customHeaders: Record<string, string> = {};
-        const customHeadersStr = config.get('customHeaders', '') as string;
-        if (customHeadersStr && customHeadersStr.trim()) {
-            try {
-                customHeaders = JSON.parse(customHeadersStr);
-            } catch (e: any) {
-                console.error('解析 customHeaders JSON 失败:', e);
-                vscode.window.showErrorMessage(`customHeaders JSON 格式错误: ${e.message}`);
-            }
-        }
+        // 直接获取自定义请求头对象
+        let customHeaders: Record<string, string> = config.get('customHeaders', {}) as Record<string, string>;
         
-        // 解析自定义请求体字段
-        let customBodyFields: Record<string, any> = {};
-        const customBodyFieldsStr = config.get('customBodyFields', '') as string;
-        if (customBodyFieldsStr && customBodyFieldsStr.trim()) {
-            try {
-                customBodyFields = JSON.parse(customBodyFieldsStr);
-            } catch (e: any) {
-                console.error('解析 customBodyFields JSON 失败:', e);
-                vscode.window.showErrorMessage(`customBodyFields JSON 格式错误: ${e.message}`);
-            }
-        }
+        // 直接获取自定义请求体字段对象
+        let customBodyFields: Record<string, any> = config.get('customBodyFields', {}) as Record<string, any>;
         
-        // 解析启用的工具列表
-        let enabledTools: string[] = [];
-        const enabledToolsStr = config.get('enabledTools', '') as string;
-        if (enabledToolsStr && enabledToolsStr.trim()) {
-            try {
-                enabledTools = JSON.parse(enabledToolsStr);
-                if (!Array.isArray(enabledTools)) {
-                    console.warn('enabledTools 不是数组格式，将重置为空数组');
-                    enabledTools = [];
-                }
-            } catch (e: any) {
-                console.error('解析 enabledTools JSON 失败:', e);
-                vscode.window.showErrorMessage(`enabledTools JSON 格式错误: ${e.message}`);
-                enabledTools = [];
-            }
+        // 直接获取启用的工具列表数组
+        let enabledTools: string[] = config.get('enabledTools', []) as string[];
+        
+        // 验证enabledTools是否为数组
+        if (!Array.isArray(enabledTools)) {
+            console.warn('enabledTools 不是数组格式，将重置为空数组');
+            enabledTools = [];
         }
         
         return {

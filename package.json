@@ -46,6 +46,18 @@
       {
         "command": "aiChat.mcp.showOutput",
         "title": "显示MCP输出"
+      },
+      {
+        "command": "aiChat.mcp.addServer",
+        "title": "添加MCP服务器"
+      },
+      {
+        "command": "aiChat.mcp.editServer",
+        "title": "编辑MCP服务器"
+      },
+      {
+        "command": "aiChat.mcp.removeServer",
+        "title": "删除MCP服务器"
       }
     ],
     "views": {
@@ -72,7 +84,15 @@
         "aiChat.apiBaseUrl": {
           "type": "string",
           "default": "https://api.openai.com/v1",
-          "description": "AI模型API基础地址"
+          "description": "AI模型API基础地址",
+          "examples": [
+            "https://api.openai.com/v1",
+            "https://api.anthropic.com/v1",
+            "https://api.moonshot.cn/v1",
+            "https://dashscope.aliyuncs.com/compatible-mode/v1",
+            "https://api.deepseek.com/v1",
+            "https://api.siliconflow.cn/v1"
+          ]
         },
         "aiChat.apiKey": {
           "type": "string",
@@ -83,19 +103,51 @@
         "aiChat.modelName": {
           "type": "string",
           "default": "gpt-3.5-turbo",
-          "description": "模型名称"
+          "description": "模型名称",
+          "examples": [
+            "gpt-3.5-turbo",
+            "gpt-4",
+            "gpt-4-turbo",
+            "gpt-4o",
+            "gpt-4o-mini",
+            "claude-3-sonnet",
+            "claude-3-opus",
+            "claude-3-haiku"
+          ]
+        },
+        "aiChat.temperature": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0,
+          "maximum": 2,
+          "description": "生成文本的随机性，0表示最确定，2表示最随机"
+        },
+        "aiChat.maxTokens": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1,
+          "maximum": 32768,
+          "description": "生成文本的最大长度"
         },
         "aiChat.customHeaders": {
-          "type": "string",
-          "default": "{}",
-          "description": "自定义HTTP请求头（JSON格式），例如{\"User-Agent\": \"MyApp\", \"X-Custom\": \"value\"}",
-          "scope": "application"
+          "type": "object",
+          "default": {},
+          "description": "自定义HTTP请求头",
+          "scope": "application",
+          "additionalProperties": {
+            "type": "string",
+            "description": "HTTP头部值"
+          }
         },
         "aiChat.customBodyFields": {
-          "type": "string",
-          "default": "{}",
-          "description": "自定义请求体字段（JSON格式），会与默认字段合并发送",
-          "scope": "application"
+          "type": "object",
+          "default": {},
+          "description": "自定义请求体字段，会与默认字段合并发送",
+          "scope": "application",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Body数据字段值"
+          }
         },
         "aiChat.overrideDefaultBody": {
           "type": "boolean",
@@ -119,16 +171,133 @@
           "scope": "application"
         },
         "aiChat.mcpServers": {
-          "type": "string",
-          "default": "[]",
-          "description": "MCP服务器配置列表（JSON数组格式），例如[{\"name\":\"memory\",\"type\":\"stdio\",\"stdio\":{\"command\":\"npx\",\"args\":[\"-y\",\"@modelcontextprotocol/server-memory\"],\"env\":{\"MEMORY_FILE_PATH\":\"${workspaceFolder}/memory.jsonl\"}}}]",
-          "scope": "application"
+          "type": "array",
+          "default": [],
+          "description": "MCP服务器配置列表（建议在对话框中打开Agent模式后进行添加或删除操作）",
+          "scope": "application",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "MCP服务器名称",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "enum": ["stdio", "sse", "websocket"],
+                "description": "MCP服务器连接类型",
+                "default": "stdio"
+              },
+              "stdio": {
+                "type": "object",
+                "description": "STDIO连接配置（当type为stdio时使用）",
+                "properties": {
+                  "command": {
+                    "type": "string",
+                    "description": "执行的命令",
+                    "minLength": 1
+                  },
+                  "args": {
+                    "type": "array",
+                    "description": "命令参数",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  },
+                  "cwd": {
+                    "type": "string",
+                    "description": "工作目录",
+                    "default": "${workspaceFolder}"
+                  },
+                  "env": {
+                    "type": "object",
+                    "description": "环境变量",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "default": {}
+                  }
+                },
+                "required": ["command"],
+                "additionalProperties": false
+              },
+              "sse": {
+                "type": "object",
+                "description": "SSE连接配置（当type为sse时使用）",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "SSE连接URL",
+                    "minLength": 1
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "SSE请求头",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "default": {}
+                  }
+                },
+                "required": ["url"],
+                "additionalProperties": false
+              },
+              "websocket": {
+                "type": "object",
+                "description": "WebSocket连接配置（当type为websocket时使用）",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "WebSocket连接URL",
+                    "minLength": 1
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "WebSocket请求头",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "default": {}
+                  }
+                },
+                "required": ["url"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["name", "type"],
+            "additionalProperties": false
+          }
         },
         "aiChat.enabledTools": {
-          "type": "string",
-          "default": "[]",
-          "description": "启用的工具列表（JSON数组格式），为空则启用所有工具。例如[\"getProjectPath\",\"getCurrentFilePath\",\"fsReadFile\"]。支持内置工具和MCP工具（格式：serverName_toolName）",
-          "scope": "application"
+          "type": "array",
+          "default": [],
+          "description": "启用的系统工具列表，为空则启用所有系统工具",
+          "scope": "application",
+          "items": {
+            "type": "string",
+            "enum": [
+              "getProjectPath",
+              "getCurrentFilePath", 
+              "getAllOpenFiles",
+              "getCurrentSelection",
+              "getCurrentLineContent",
+              "getCursorInfo",
+              "openFileToEdit",
+              "fsReadFile",
+              "fsWriteFile",
+              "fsDelete",
+              "fsRename",
+              "fsCreateDirectory",
+              "fsReadDirectory",
+              "fsStat",
+              "fsCopy",
+              "fsEditFile",
+              "fsSearchFiles"
+            ],
+            "minLength": 1
+          }
         }
       }
     },
@@ -150,6 +319,20 @@
           "command": "aiChat.clearHistory",
           "when": "view == aiChatView",
           "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "aiChat.mcp.addServer",
+          "group": "aiChat@1"
+        },
+        {
+          "command": "aiChat.mcp.editServer",
+          "group": "aiChat@2"
+        },
+        {
+          "command": "aiChat.mcp.removeServer",
+          "group": "aiChat@3"
         }
       ]
     }

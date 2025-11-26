@@ -107,6 +107,7 @@ export const App: React.FC = () => {
 
     const handleMcpSelectionChange = (servers: string[]) => {
         setSelectedMcpServers(servers);
+        console.log('handleMcpSelectionChange',servers);
         vscode.postMessage({
             type: 'updateMcpSelection',
             selectedMcpServers: servers
@@ -127,6 +128,19 @@ export const App: React.FC = () => {
         });
     };
 
+    const handleAddServer = () => {
+        vscode.postMessage({
+            type: 'addMcpServer'
+        });
+    };
+
+    const handleRemoveServer = (serverName: string) => {
+        vscode.postMessage({
+            type: 'deleteSpecificServer',
+            serverName: serverName
+        });
+    };
+
     return (
         <div className={styles.app}>
             <ChatContainer 
@@ -141,6 +155,8 @@ export const App: React.FC = () => {
                 onMcpSelectionChange={handleMcpSelectionChange}
                 onReconnectServer={handleReconnectServer}
                 onDisconnectServer={handleDisconnectServer}
+                onAddServer={handleAddServer}
+                onRemoveServer={handleRemoveServer}
             />
             <InputArea 
                 onSendMessage={handleSendMessage}

@@ -8,14 +8,21 @@ import { env } from 'process';
 
 export interface McpServerConfig {
     name: string;
-    type: 'sse' | 'websocket' | 'stdio';
-    stdio?:{
+    type: 'sse' | 'stdio' | 'websocket';
+    stdio?: {
         command: string;
         args?: string[];
+        cwd?: string;
         env?: { [key: string]: string}
     }
-    sse?: string,
-    websocket?: string,
+    sse?: {
+        url: string;
+        headers?: { [key: string]: string}
+    }
+    websocket?: {
+        url: string;
+        headers?: { [key: string]: string}
+    }
 }
 
 export class McpManager implements vscode.Disposable {
@@ -39,6 +46,7 @@ export class McpManager implements vscode.Disposable {
             name: "mcp-proxy-cli", 
             version: "1.0.0" 
         },{capabilities: {tools: true}});
+        
         if(config.type === 'stdio' && config.stdio) {
             // 替换 ${workspaceFolder} 为实际的工作区路径
             const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -51,25 +59,29 @@ export class McpManager implements vscode.Disposable {
                     value.replace(/\$\{workspaceFolder\}/g, workspaceFolder || '')
                 ])
             ) : undefined;
+            
             const stdioConfig = {
-                ...config.stdio,
+                command: config.stdio.command,
                 args: processedArgs || [],
-                env: processedEnv  || {}
+                env: {
+                    ...processedEnv,
+                    ...(config.stdio.cwd ? { CWD: config.stdio.cwd.replace(/\$\{workspaceFolder\}/g, workspaceFolder || '') } : {})
+                }
             };
             const transport = new StdioClientTransport(stdioConfig);
             await mcpCli.connect(transport);
         }
         if(config.type === 'sse' && config.sse) {
-            const transport = new SSEClientTransport(new URL(config.sse));
+            const transport = new SSEClientTransport(new URL(config.sse.url));
             await mcpCli.connect(transport);
         }
         if(config.type === 'websocket' && config.websocket) {
-            const transport = new WebSocketClientTransport(new URL(config.websocket));
+            const transport = new WebSocketClientTransport(new URL(config.websocket.url));
             await mcpCli.connect(transport);
         }
 
         this.connectedServers.set(config.name,mcpCli);
-        this.outputChannel.appendLine(`MCP服务器 ${config.name} 已记录（简化模式）`);
+        this.outputChannel.appendLine(`MCP服务器 ${config.name} 已连接`);
     }
 
     public async callTool(serverName: string, toolName: string, args: any): Promise<any> {
@@ -102,18 +114,8 @@ export class McpManager implements vscode.Disposable {
     public async connectServer(serverName: string): Promise<void> {
         const config = vscode.workspace.getConfiguration('aiChat');
         
-        // 解析 MCP 服务器配置
-        let servers: McpServerConfig[] = [];
-        const serversStr = config.get('mcpServers', '[]') as string;
-        if (serversStr && serversStr.trim()) {
-            try {
-                servers = JSON.parse(serversStr);
-            } catch (e: any) {
-                this.outputChannel.appendLine(`解析 mcpServers JSON 失败: ${e.message}`);
-                vscode.window.showErrorMessage(`mcpServers JSON 格式错误: ${e.message}`);
-                return;
-            }
-        }
+        // 直接获取 MCP 服务器配置数组
+        const servers = config.get('mcpServers', []) as McpServerConfig[];
         
         const serverConfig = servers.find(s => s.name === serverName);
 

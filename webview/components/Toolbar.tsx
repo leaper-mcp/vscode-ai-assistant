@@ -10,6 +10,8 @@ interface ToolbarProps {
     onMcpSelectionChange?: (servers: string[]) => void;
     onReconnectServer?: (serverName: string) => void;
     onDisconnectServer?: (serverName: string) => void;
+    onAddServer?: () => void;
+    onRemoveServer?: (serverName: string) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -19,7 +21,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     selectedMcpServers = [],
     onMcpSelectionChange,
     onReconnectServer,
-    onDisconnectServer
+    onDisconnectServer,
+    onAddServer,
+    onRemoveServer
 }) => {
     const [mcpServerInfos, setMcpServerInfos] = useState<McpServerInfo[]>(allMcpServers);
 
@@ -47,6 +51,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         e.preventDefault();
         e.stopPropagation();
         onDisconnectServer?.(serverName);
+    };
+
+    const handleDeleteServer = async (serverName: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onRemoveServer?.(serverName);
     };
 
     const handleSelectAll = () => {
@@ -95,7 +105,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     />
                     <span className={styles.slider}></span>
                 </label>
-                <span className={styles.switchLabel}>Agent模式(如果模型支持则可能会读取并修改代码)</span>
+                <span className={styles.switchLabel}>Agent模式(开启后可能会读取并修改代码)</span>                            
+                {toolsEnabled && <button 
+                    className={styles.mcpManageButton}
+                    onClick={onAddServer}
+                    title="添加新的MCP服务器"
+                >
+                    ➕添加MCP服务
+                </button>}
             </div>
             
             {toolsEnabled && mcpServerInfos.length > 0 && (
@@ -175,6 +192,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                                             断开
                                         </button>
                                     )}
+                                    <button 
+                                        className={styles.mcpDeleteButton}
+                                        onClick={(e) => handleDeleteServer(serverInfo.name, e)}
+                                        title="删除此服务器"
+                                    >
+                                        🗑️
+                                    </button>
                                 </div>
                             );
                         })}
