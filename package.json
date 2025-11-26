@@ -346,6 +346,7 @@
     "dev:webview": "vite build --watch",
     "prepackage": "rimraf out && npm run build",
     "package": "vsce package",
+    "prepublish": "npm run prepackage",
     "publish": "vsce publish"
   },
   "devDependencies": {
