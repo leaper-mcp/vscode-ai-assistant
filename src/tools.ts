@@ -208,6 +208,14 @@ export const toolHandlers:{[key:string]:Function} = {
         dryRun?: boolean;
     }): Promise<string> => {
         try {
+            // 询问用户是否确认编辑
+            const answer = await vscode.window.showQuickPick(['是', '否'], {
+                placeHolder: `确定要编辑文件 ${params.path} 吗？`
+            });
+            
+            if (answer !== '是') {
+                throw new Error('用户拒绝了编辑');
+            }
             const uri = vscode.Uri.file(params.path);
             const document = await vscode.workspace.openTextDocument(uri);
             
