@@ -1,5 +1,6 @@
 import React from 'react';
 import { marked } from 'marked';
+import hljs from 'highlight.js';
 import { ChatMessage as ChatMessageType } from '../types';
 import styles from './ChatMessage.module.css';
 
@@ -8,6 +9,19 @@ interface ChatMessageProps {
     messageId: number;
     isStreaming?: boolean;
 }
+
+// 配置 marked 使用 highlight.js 进行代码高亮
+marked.setOptions({
+  extensions: {
+    renderers: {
+      code: function(code) {
+        return `<pre class='code'><code class="language-${code.lang}">${hljs.highlight(code.text, { language: code.lang }).value}</code></pre>`;
+      }
+    },
+    childTokens:{}
+  }
+});
+
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
     message, 

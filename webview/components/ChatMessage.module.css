@@ -83,9 +83,32 @@
 }
 
 .markdownContent pre code {
-    background-color: transparent;
+    background-color: transparent !important;
     padding: 0;
     border-radius: 0;
+}
+
+/* 代码高亮样式 */
+.markdownContent pre {
+    position: relative;
+}
+
+.markdownContent pre code.hljs {
+    background-color: transparent !important;
+    color: inherit;
+}
+
+/* 确保 highlight.js 的样式不会覆盖我们的主题 */
+.hljs {
+    background: transparent !important;
+    color: var(--vscode-editor-foreground) !important;
+}
+
+/* 代码块容器样式优化 */
+.markdownContent .hljs {
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+    line-height: 1.4;
 }
 
 .markdownContent ul,

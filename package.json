@@ -2,7 +2,7 @@
   "name": "vscode-ai-assistant",
   "displayName": "VSCODE AI Assistant",
   "description": "AI对话助手，支持多种模型配置和MCP接入",
-  "publisher":"leaper",
+  "publisher": "leaper",
   "version": "0.0.8",
   "repository": {
     "type": "git",
@@ -117,7 +117,7 @@
         },
         "aiChat.temperature": {
           "type": "number",
-          "default": 1.0,
+          "default": 1,
           "minimum": 0,
           "maximum": 2,
           "description": "生成文本的随机性，0表示最确定，2表示最随机"
@@ -185,7 +185,11 @@
               },
               "type": {
                 "type": "string",
-                "enum": ["stdio", "sse", "websocket"],
+                "enum": [
+                  "stdio",
+                  "sse",
+                  "websocket"
+                ],
                 "description": "MCP服务器连接类型",
                 "default": "stdio"
               },
@@ -220,7 +224,9 @@
                     "default": {}
                   }
                 },
-                "required": ["command"],
+                "required": [
+                  "command"
+                ],
                 "additionalProperties": false
               },
               "sse": {
@@ -241,7 +247,9 @@
                     "default": {}
                   }
                 },
-                "required": ["url"],
+                "required": [
+                  "url"
+                ],
                 "additionalProperties": false
               },
               "websocket": {
@@ -262,11 +270,16 @@
                     "default": {}
                   }
                 },
-                "required": ["url"],
+                "required": [
+                  "url"
+                ],
                 "additionalProperties": false
               }
             },
-            "required": ["name", "type"],
+            "required": [
+              "name",
+              "type"
+            ],
             "additionalProperties": false
           }
         },
@@ -279,7 +292,7 @@
             "type": "string",
             "enum": [
               "getProjectPath",
-              "getCurrentFilePath", 
+              "getCurrentFilePath",
               "getAllOpenFiles",
               "getCurrentSelection",
               "getCurrentLineContent",
@@ -363,7 +376,9 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
+    "@types/highlight.js": "^9.12.4",
     "eventsource": "^3.0.7",
+    "highlight.js": "^11.11.1",
     "marked": "^9.1.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
