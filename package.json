@@ -161,7 +161,7 @@
         },
         "aiChat.enableTools": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "启用工具调用功能，允许AI使用文件操作等工具"
         },
         "aiChat.systemRole": {
