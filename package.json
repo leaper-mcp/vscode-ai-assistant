@@ -3,7 +3,7 @@
   "displayName": "VSCODE AI Assistant",
   "description": "AI对话助手，支持多种模型配置和MCP接入",
   "publisher": "leaper",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/leaper-mcp/vscode-ai-assistant.git"
