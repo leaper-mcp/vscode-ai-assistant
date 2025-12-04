@@ -209,7 +209,8 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
             this._view.webview.postMessage({
                 type: 'updateHistory',
                 history: this.chatHistory,
-                toolsEnabled: config.enableTools
+                toolsEnabled: config.enableTools,
+                selectedMcpServers: this.selectedMcpServers
             });
         }
     }

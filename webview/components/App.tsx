@@ -37,6 +37,9 @@ export const App: React.FC = () => {
                     if (message.toolsEnabled !== undefined) {
                         setToolsEnabled(message.toolsEnabled);
                     }
+                    if(Array.isArray(message.selectedMcpServers)) {
+                        setSelectedMcpServers(message.selectedMcpServers)
+                    }
                     break;
                     
                 case 'streamStart':

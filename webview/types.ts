@@ -26,4 +26,5 @@ export interface WebviewMessage {
     message?: string;
     mcpServers?: string[];
     allMcpServers?: McpServerInfo[];
+    selectedMcpServers?: string[];
 }
