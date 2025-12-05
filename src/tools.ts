@@ -3,12 +3,27 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+const getProjectPath = (): string => {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+        return workspaceFolders[0].uri.fsPath;
+    }
+    return '';
+}
+
+const getAbsolutePath = (filePath: string): string => {
+    if(path.isAbsolute(filePath)){
+        return filePath;
+    }
+    return path.join(getProjectPath(), filePath)
+}
+
 // 工具方法实现
 export const toolHandlers:{[key:string]:Function} = {
     getProjectPath: async (): Promise<string> => {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (workspaceFolders && workspaceFolders.length > 0) {
-            return workspaceFolders[0].uri.fsPath;
+        const projectPath = getProjectPath();
+        if(projectPath) {
+            return projectPath;
         }
         throw new Error('没有打开的工作区');
     },
@@ -76,6 +91,7 @@ export const toolHandlers:{[key:string]:Function} = {
 
     openFileToEdit: async (params: { path: string }): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const document = await vscode.workspace.openTextDocument(uri);
             await vscode.window.showTextDocument(document);
@@ -88,6 +104,7 @@ export const toolHandlers:{[key:string]:Function} = {
     // vscode.workspace.fs 方法实现
     fsReadFile: async (params: { path: string }): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const uint8Array = await vscode.workspace.fs.readFile(uri);
             return new TextDecoder().decode(uint8Array);
@@ -98,6 +115,7 @@ export const toolHandlers:{[key:string]:Function} = {
 
     fsWriteFile: async (params: { path: string; content: string }): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const uint8Array = new TextEncoder().encode(params.content);
             await vscode.workspace.fs.writeFile(uri, uint8Array);
@@ -108,6 +126,7 @@ export const toolHandlers:{[key:string]:Function} = {
     },
     fsAgree: async (params: { path: string;}): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             // 询问用户是否确认修改
             const answer = await vscode.window.showQuickPick(['是', '否'], {
                 placeHolder: `确定要修改 ${params.path} 吗？`
@@ -123,6 +142,7 @@ export const toolHandlers:{[key:string]:Function} = {
     },  
     fsDelete: async (params: { path: string; recursive?: boolean }): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const options = { recursive: params.recursive || false };
             await vscode.workspace.fs.delete(uri, options);
@@ -134,6 +154,8 @@ export const toolHandlers:{[key:string]:Function} = {
 
     fsRename: async (params: { oldPath: string; newPath: string }): Promise<string> => {
         try {
+            params.oldPath = getAbsolutePath(params.oldPath);
+            params.newPath = getAbsolutePath(params.newPath);
             const oldUri = vscode.Uri.file(params.oldPath);
             const newUri = vscode.Uri.file(params.newPath);
             await vscode.workspace.fs.rename(oldUri, newUri);
@@ -145,6 +167,7 @@ export const toolHandlers:{[key:string]:Function} = {
 
     fsCreateDirectory: async (params: { path: string }): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             await vscode.workspace.fs.createDirectory(uri);
             return `VSCode FS 目录已成功创建: ${params.path}`;
@@ -155,6 +178,7 @@ export const toolHandlers:{[key:string]:Function} = {
 
     fsReadDirectory: async (params: { path: string }): Promise<Array<{ name: string; type: 'file' | 'directory' }>> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const entries = await vscode.workspace.fs.readDirectory(uri);
             return entries.map(([name, type]) => ({
@@ -173,6 +197,7 @@ export const toolHandlers:{[key:string]:Function} = {
         size: number;
     }> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const stat = await vscode.workspace.fs.stat(uri);
             return {
@@ -190,6 +215,8 @@ export const toolHandlers:{[key:string]:Function} = {
 
     fsCopy: async (params: { source: string; destination: string }): Promise<string> => {
         try {
+            params.source = getAbsolutePath(params.source);
+            params.destination = getAbsolutePath(params.destination);
             const sourceUri = vscode.Uri.file(params.source);
             const destUri = vscode.Uri.file(params.destination);
             await vscode.workspace.fs.copy(sourceUri, destUri);
@@ -204,6 +231,7 @@ export const toolHandlers:{[key:string]:Function} = {
         dryRun?: boolean;
     }): Promise<string> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const uri = vscode.Uri.file(params.path);
             const document = await vscode.workspace.openTextDocument(uri);
             
@@ -292,6 +320,7 @@ export const toolHandlers:{[key:string]:Function} = {
         excludePatterns?: string[];
     }): Promise<string[]> => {
         try {
+            params.path = getAbsolutePath(params.path);
             const baseUri = vscode.Uri.file(params.path);
             const matches: string[] = [];
             const excludeRegexps = params.excludePatterns?.map(pattern => 
@@ -423,7 +452,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "要打开文件的文件系统路径，注意这里必须是绝对路径"
+                description: "要打开文件的文件系统路径"
               }
             },
             required:["path"]
@@ -440,7 +469,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "文件的文件系统路径，注意这里必须是绝对路径"
+                description: "文件的文件系统路径"
               }
             },
             required:["path"]
@@ -457,7 +486,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "文件的文件系统路径，注意这里必须是绝对路径"
+                description: "文件的文件系统路径"
               },
               content:{
                 type: "string",
@@ -478,7 +507,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "请求修改的文件系统路径，注意这里必须是绝对路径"
+                description: "请求修改的文件系统路径"
               }
             },
             required:["path"]
@@ -495,7 +524,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "要删除的文件或目录的文件系统路径，注意这里必须是绝对路径"
+                description: "要删除的文件或目录的文件系统路径"
               },
               recursive:{
                 type: "boolean",
@@ -516,11 +545,11 @@ export const tools = [
             properties: {
               oldPath:{
                 type: "string",
-                description: "原文件或目录的文件系统路径，注意这里必须是绝对路径"
+                description: "原文件或目录的文件系统路径"
               },
               newPath:{
                 type: "string",
-                description: "新文件或目录的文件系统路径，注意这里必须是绝对路径"
+                description: "新文件或目录的文件系统路径"
               }
             },
             required:["oldPath","newPath"]
@@ -537,7 +566,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "要创建的目录的文件系统路径，注意这里必须是绝对路径"
+                description: "要创建的目录的文件系统路径"
               }
             },
             required:["path"]
@@ -554,7 +583,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "目录的文件系统路径，注意这里必须是绝对路径"
+                description: "目录的文件系统路径"
               }
             },
             required:["path"]
@@ -571,7 +600,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "文件或目录的文件系统路径，注意这里必须是绝对路径"
+                description: "文件或目录的文件系统路径"
               }
             },
             required:["path"]
@@ -588,11 +617,11 @@ export const tools = [
             properties: {
               source:{
                 type: "string",
-                description: "源文件或目录的文件系统路径，注意这里必须是绝对路径"
+                description: "源文件或目录的文件系统路径"
               },
               destination:{
                 type: "string",
-                description: "目标文件或目录的文件系统路径，注意这里必须是绝对路径"
+                description: "目标文件或目录的文件系统路径"
               }
             },
             required:["source","destination"]
@@ -609,7 +638,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "要编辑的文件路径，注意这里必须是绝对路径"
+                description: "要编辑的文件路径"
               },
               edits:{
                 type: "array",
@@ -648,7 +677,7 @@ export const tools = [
             properties: {
               path:{
                 type: "string",
-                description: "起始目录路径，注意这里必须是绝对路径"
+                description: "起始目录路径"
               },
               pattern:{
                 type: "string",
