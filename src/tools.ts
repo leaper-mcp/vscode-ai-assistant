@@ -135,7 +135,7 @@ export const toolHandlers:{[key:string]:Function} = {
             if (answer !== '是') {
                 throw new Error('用户拒绝修改');
             }
-            return '用户同意修改';
+            return `用户同意修改，同意修改的路径为: ${params.path},请将该路径显示到对话中`;
         } catch (error) {
             throw new Error(`VSCode FS 同意修改文件失败: ${error}`);
         }
