@@ -209,7 +209,8 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
             this._view.webview.postMessage({
                 type: 'updateHistory',
                 history: this.chatHistory,
-                toolsEnabled: config.enableTools,
+                toolsEnabled: config.isEnableTools,
+                showToolsExec: config.showToolsExec,
                 selectedMcpServers: this.selectedMcpServers
             });
         }
@@ -248,7 +249,7 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
 
     public async toggleTools(enabled: boolean) {
         const config = vscode.workspace.getConfiguration('aiChat');
-        await config.update('enableTools', enabled, vscode.ConfigurationTarget.Global);
+        await config.update('isEnableTools', enabled, vscode.ConfigurationTarget.Global);
         this.aiService = new AiService(); // 重新创建服务实例以使用新配置
         
         // 显示状态提示

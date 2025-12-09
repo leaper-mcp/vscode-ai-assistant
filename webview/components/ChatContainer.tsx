@@ -5,11 +5,13 @@ import styles from './ChatContainer.module.css';
 
 interface ChatContainerProps {
     messages: ChatMessageType[];
+    showToolsExec?: boolean;
     streamingMessageId?: number;
 }
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({ 
     messages, 
+    showToolsExec,
     streamingMessageId 
 }) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -18,7 +20,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages,showToolsExec]);
 
     if (messages.length === 0) {
         return (
@@ -40,6 +42,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 <ChatMessage
                     key={index}
                     message={message}
+                    showToolsExec={showToolsExec}
                     messageId={index}
                     isStreaming={streamingMessageId === index}
                 />

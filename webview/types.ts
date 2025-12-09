@@ -25,6 +25,7 @@ export interface WebviewMessage {
     messageId?: number;
     data?: ChatMessage[];
     toolsEnabled?: boolean;
+    showToolsExec?: boolean;
     message?: string;
     mcpServers?: string[];
     allMcpServers?: McpServerInfo[];

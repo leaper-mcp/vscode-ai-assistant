@@ -9,6 +9,7 @@ interface ChatMessageProps {
     message: ChatMessageType;
     messageId: number;
     isStreaming?: boolean;
+    showToolsExec?: boolean;
 }
 
 // 配置 marked 使用 highlight.js 进行代码高亮
@@ -26,12 +27,16 @@ marked.setOptions({
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
     message, 
+    showToolsExec = false ,
     messageId, 
     isStreaming = false 
 }) => {
-    if(message.role === 'tool') {
+    if(!showToolsExec) {
+        if(message.role === 'tool') {
         return (<div></div>)
     }
+    }
+    
     const isUser = message.role === 'user';
     
     return (
@@ -46,15 +51,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 className={isUser ? styles.pre : `${styles.markdownContent} ${isStreaming ? styles.streaming : ''}`}
                 data-message-content={messageId}
             >
-                {isUser ? (
-                    message.content
-                ) : (
-                    <div 
-                        dangerouslySetInnerHTML={{ 
-                            __html: marked.parse(message.content) 
-                        }} 
-                    />
-                )}
+                {message.role === 'user' && (message.content)}
+                {message.role === 'assistant' && (<div 
+                    dangerouslySetInnerHTML={{ 
+                        __html: marked.parse(message.content) 
+                    }} 
+                />)}
+                {message.role === 'tool' && (<div>执行结果：<div 
+                    dangerouslySetInnerHTML={{ 
+                        __html: marked.parse(message.content) 
+                    }} 
+                /></div>)}
                 {message?.tool_calls?.length && (
                     <div>
                         {message.tool_calls.map((toolCall, index) => (
@@ -67,6 +74,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
                                         )
                                     }
+                                    {toolCall?.function?.arguments && showToolsExec &&  (<div>参数：<div 
+                                        dangerouslySetInnerHTML={{ 
+                                            __html: marked.parse(toolCall?.function?.arguments) 
+                                        }} 
+                                    /></div>)}
                                 </div>
                             </div>
                         ))}

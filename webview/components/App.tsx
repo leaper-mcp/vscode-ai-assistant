@@ -16,6 +16,7 @@ const vscode = window.acquireVsCodeApi();
 export const App: React.FC = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [toolsEnabled, setToolsEnabled] = useState(false);
+    const [showToolsExec, setShowToolsExec] = useState(false);
     const [streamingMessageId, setStreamingMessageId] = useState<number | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const [allMcpServers, setAllMcpServers] = useState<any[]>([]);
@@ -36,6 +37,9 @@ export const App: React.FC = () => {
                     setMessages(message.history || []);
                     if (message.toolsEnabled !== undefined) {
                         setToolsEnabled(message.toolsEnabled);
+                    }
+                    if(message.showToolsExec !== undefined) {
+                        setShowToolsExec(message.showToolsExec);
                     }
                     if(Array.isArray(message.selectedMcpServers)) {
                         setSelectedMcpServers(message.selectedMcpServers)
@@ -148,6 +152,7 @@ export const App: React.FC = () => {
         <div className={styles.app}>
             <ChatContainer 
                 messages={messages} 
+                showToolsExec={showToolsExec}
                 streamingMessageId={streamingMessageId}
             />
             <Toolbar 

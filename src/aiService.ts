@@ -27,7 +27,8 @@ export interface AiConfig {
     customBodyFields: Record<string, any>;
     overrideDefaultBody: boolean;
     enableStream: boolean;
-    enableTools: boolean;
+    isEnableTools: boolean;
+    showToolsExec: boolean;
     systemRole: string;
     enabledTools: string[];
 }
@@ -78,7 +79,8 @@ export class AiService {
             customBodyFields: customBodyFields,
             overrideDefaultBody: config.get('overrideDefaultBody', false),
             enableStream: config.get('enableStream', true),
-            enableTools: config.get('enableTools', true),
+            isEnableTools: config.get('isEnableTools', true),
+            showToolsExec: config.get('showToolsExec', false),
             systemRole: config.get('systemRole', ''),
             enabledTools: enabledTools
         };
@@ -167,7 +169,7 @@ export class AiService {
             while (currentIteration < maxIterations) {
                 // 获取动态工具列表（包括MCP工具）
                 let allTools: any[] = [];
-                if (this.config.enableTools) {
+                if (this.config.isEnableTools) {
                     const mcpTools = await this.getMcpTools();
                     // 分别处理内置工具和MCP工具
                     allTools = this.filterTools([...tools], mcpTools);
@@ -187,7 +189,7 @@ export class AiService {
                 };
 
                 // 只有在启用工具时才添加工具相关字段
-                if (this.config.enableTools) {
+                if (this.config.isEnableTools) {
                     defaultBody.tools = allTools;
                     defaultBody.tool_choice = "auto";
                 }
@@ -348,7 +350,7 @@ export class AiService {
             while (currentIteration < maxIterations) {
                 // 获取动态工具列表（包括MCP工具）
                 let allTools: any[] = [];
-                if (this.config.enableTools) {
+                if (this.config.isEnableTools) {
                     const mcpTools = await this.getMcpTools();
                     // 分别处理内置工具和MCP工具
                     allTools = this.filterTools([...tools], mcpTools);
@@ -369,7 +371,7 @@ export class AiService {
                 };
 
                 // 只有在启用工具时才添加工具相关字段
-                if (this.config.enableTools) {
+                if (this.config.isEnableTools) {
                     defaultBody.tools = allTools;
                     defaultBody.tool_choice = "auto";
                 }

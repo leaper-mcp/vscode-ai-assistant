@@ -96,6 +96,6 @@
 
 ### 与其他配置的关系
 
-- `aiChat.enableTools`: 全局开关，控制是否启用工具功能
+- `aiChat.isEnableTools`: 全局开关，控制是否启用工具功能
 - `aiChat.enabledTools`: 精确控制哪些内置工具可用，不影响MCP工具
-- 只有当 `enableTools` 为 `true` 时，`enabledTools` 配置才会生效
+- 只有当 `isEnableTools` 为 `true` 时，`enabledTools` 配置才会生效

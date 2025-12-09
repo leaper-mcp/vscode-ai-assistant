@@ -159,10 +159,15 @@
           "default": true,
           "description": "启用流式响应，可以实时看到AI的回复过程"
         },
-        "aiChat.enableTools": {
+        "aiChat.isEnableTools": {
           "type": "boolean",
           "default": true,
           "description": "启用工具调用功能，允许AI使用文件操作等工具"
+        },
+        "aiChat.showToolsExec": {
+          "type": "boolean",
+          "default": false,
+          "description": "启用工具调用功能信息展示,一般用于MCP调试"
         },
         "aiChat.systemRole": {
           "type": "string",

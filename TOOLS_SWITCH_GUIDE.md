@@ -9,7 +9,7 @@
 在 `package.json` 中新增了配置项：
 
 ```json
-"aiChat.enableTools": {
+"aiChat.isEnableTools": {
   "type": "boolean",
   "default": false,
   "description": "启用工具调用功能，允许AI使用文件操作等工具"
@@ -37,9 +37,9 @@
 
 ## 技术实现
 
-1. **配置层**：在 `AiConfig` 接口中添加 `enableTools` 字段
+1. **配置层**：在 `AiConfig` 接口中添加 `isEnableTools` 字段
 
-2. **服务层**：在 `AiService` 中根据 `enableTools` 配置决定是否在API请求中包含工具相关字段
+2. **服务层**：在 `AiService` 中根据 `isEnableTools` 配置决定是否在API请求中包含工具相关字段
 
 3. **界面层**：在聊天界面的HTML中添加开关控件和相关样式
 
