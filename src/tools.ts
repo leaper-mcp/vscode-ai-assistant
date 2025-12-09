@@ -135,7 +135,7 @@ export const toolHandlers:{[key:string]:Function} = {
             if (answer !== '是') {
                 throw new Error('用户拒绝修改');
             }
-            return `用户同意修改，同意修改的路径为: ${params.path},请将该路径显示到对话中`;
+            return `用户同意修改，同意修改的路径为: ${params.path}`;
         } catch (error) {
             throw new Error(`VSCode FS 同意修改文件失败: ${error}`);
         }
@@ -501,7 +501,7 @@ export const tools = [
       "type": "function",
       "function":{
           name: "fsAgree",
-          description: "发起请求修改的文件(需要在用户修改文件之前调用，每轮用户对话下的每个文件路径提醒一次即可)，如果用户同意才能进行修改文件的相关操作，比如修改和删除文件",
+          description: "发起请求修改的文件(需要在用户修改文件之前调用，每轮用户对话下的相同文件路径提醒一次即可)，如果用户同意才能进行修改文件的相关操作，比如新增，修改，删除文件等操作",
           parameters: {
             type: "object",
             properties: {

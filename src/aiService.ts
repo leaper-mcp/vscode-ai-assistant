@@ -11,7 +11,7 @@ export interface ChatMessage {
 }
 
 export interface StreamChunk {
-    content: string;
+    data: ChatMessage[];
     done: boolean;
 }
 
@@ -134,7 +134,7 @@ export class AiService {
         }
     }
 
-    public async sendMessage(messages: ChatMessage[]): Promise<string> {
+    public async sendMessage(messages: ChatMessage[]): Promise<ChatMessage[]> {
         if (!this.config.apiKey && !this.config.customHeaders['Authorization']) {
             throw new Error('请先配置API密钥或自定义Authorization头');
         }
@@ -282,7 +282,7 @@ export class AiService {
                         continue;
                     } else {
                         // 没有工具调用，直接返回响应内容
-                        return message.content || '';
+                        return conversationMessages || [];
                     }
                 } else {
                     throw new Error('API返回了无效的响应');
@@ -426,6 +426,12 @@ export class AiService {
                 let hasToolCalls = false;
                 let toolCallMap: any = {};
                 let assistantMessage = '';
+                const message:ChatMessage = {
+                    role: 'assistant',
+                    content: assistantMessage,
+                    timestamp: Date.now()
+                }
+                conversationMessages.push(message);
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -453,7 +459,8 @@ export class AiService {
                                 
                                 if (delta?.content) {
                                     assistantMessage += delta.content;
-                                    callback({ content: delta.content, done: false });
+                                    message.content = assistantMessage;
+                                    callback({ data:conversationMessages, done: false });
                                 }
                                 
                                 // 检查工具调用
@@ -492,12 +499,7 @@ export class AiService {
                 if (hasToolCalls) {
                     // 有工具调用，执行工具并继续对话
                     const tool_calls:any = Object.values(toolCallMap)
-                    conversationMessages.push({
-                        role: 'assistant',
-                        content: assistantMessage,
-                        tool_calls,
-                        timestamp: Date.now()
-                    });
+                    message.tool_calls = tool_calls;
                     for(const toolCall of tool_calls) {
                         // 执行工具调用
                         const functionName = toolCall.function.name;
@@ -534,11 +536,11 @@ export class AiService {
                     
                     currentIteration++;
                     // 通知客户端开始新的工具执行轮次
-                    callback({ content: `\n\n[${tool_calls.map((e: { function: { name: any; }; })=>e.function.name).join()}工具执行中...]\n\n`, done: false });
+                    callback({  data:conversationMessages, done: false });
                     continue;
                 } else {
                     // 没有工具调用，结束流式响应
-                    callback({ content: '', done: true });
+                    callback({  data:conversationMessages, done: true });
                     return;
                 }
             }

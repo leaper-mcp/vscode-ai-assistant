@@ -1,7 +1,9 @@
 export interface ChatMessage {
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant'|'tool';
     content: string;
     timestamp: number;
+    tool_calls?: any[];
+    tool_call_id?: string;
 }
 
 export interface ExtensionMessage {
@@ -21,7 +23,7 @@ export interface WebviewMessage {
     type: 'updateHistory' | 'streamStart' | 'streamChunk' | 'streamEnd' | 'thinking' | 'error' | 'status' | 'updateMcpServers' | 'updateAllMcpServers';
     history?: ChatMessage[];
     messageId?: number;
-    content?: string;
+    data?: ChatMessage[];
     toolsEnabled?: boolean;
     message?: string;
     mcpServers?: string[];

@@ -169,21 +169,21 @@ export class AiChatProvider implements vscode.WebviewViewProvider {
                             this._view.webview.postMessage({ 
                                 type: 'streamChunk',
                                 messageId: this.chatHistory.length - 1,
-                                content: chunk.content 
+                                data: chunk.data 
                             });
                         }
                         
                         // 更新本地消息内容
-                        this.chatHistory[this.chatHistory.length - 1].content += chunk.content;
+                        this.chatHistory = chunk.data;
                     }
                 });
             } else {
                 // 使用普通响应
                 this._view.webview.postMessage({ type: 'thinking' });
                 
-                const response = await this.aiService.sendMessage(this.chatHistory.slice(0, -1));
+                const ChatMessages = await this.aiService.sendMessage(this.chatHistory.slice(0, -1));
                 
-                this.chatHistory[this.chatHistory.length - 1].content = response;
+                this.chatHistory = ChatMessages;
                 
                 if (this._view) {
                     this._view.webview.postMessage({ 

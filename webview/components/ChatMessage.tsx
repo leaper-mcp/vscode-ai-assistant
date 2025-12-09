@@ -29,6 +29,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     messageId, 
     isStreaming = false 
 }) => {
+    if(message.role === 'tool') {
+        return (<div></div>)
+    }
     const isUser = message.role === 'user';
     
     return (
@@ -51,6 +54,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                             __html: marked.parse(message.content) 
                         }} 
                     />
+                )}
+                {message?.tool_calls?.length && (
+                    <div>
+                        {message.tool_calls.map((toolCall, index) => (
+                            <div key={index}>
+                                <div>
+                                    {
+                                        toolCall?.function?.name && (
+
+                                            <span>调用工具【{toolCall?.function?.name}】中...</span>
+
+                                        )
+                                    }
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

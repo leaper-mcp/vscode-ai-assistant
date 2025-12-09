@@ -48,15 +48,8 @@ export const App: React.FC = () => {
                     break;
                     
                 case 'streamChunk':
-                    if (message.messageId !== undefined && message.content !== undefined) {
-                        setMessages(prev => {
-                            const newMessages = [...prev];
-                            if (message.messageId! < newMessages.length) {
-                                newMessages[message.messageId!].content += message.content!;
-                            }
-                            return newMessages;
-                        });
-                    }
+                    setMessages(message.data || [])
+                    setStreamingMessageId(message.data?.length ? message.data.length - 1 : undefined);
                     break;
                     
                 case 'streamEnd':
