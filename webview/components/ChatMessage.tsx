@@ -57,7 +57,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         __html: marked.parse(message.content) 
                     }} 
                 />)}
-                {message.role === 'tool' && (<div>执行结果：<div 
+                {message.role === 'tool' && (<div>
+                    {showToolsExec &&<div>执行ID:{message?.tool_call_id || '未知'}</div>}
+                    执行结果：<div 
                     dangerouslySetInnerHTML={{ 
                         __html: marked.parse(message.content) 
                     }} 
@@ -66,6 +68,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                     <div>
                         {message.tool_calls.map((toolCall, index) => (
                             <div key={index}>
+                                {showToolsExec &&<div>执行ID:{toolCall?.id || '未知'}</div>}
                                 <div>
                                     {
                                         toolCall?.function?.name && (
